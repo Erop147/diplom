@@ -1,2 +1,1 @@
-diplom
-======
+Repo for my diploma work
