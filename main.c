@@ -3,15 +3,22 @@
 #include <pcap.h>
 #include <unistd.h>
 
-
-int PrintDefaultDevice() {
-    char *dev, errbuf[PCAP_ERRBUF_SIZE];
-
-    dev = pcap_lookupdev(errbuf);
+int GetDefaultDevice(char** res) {
+    char errbuf[PCAP_ERRBUF_SIZE];
+    char* dev = pcap_lookupdev(errbuf);
     if (dev == NULL) {
         fprintf(stderr, "Couldn't find default device: %s\nMay be is it need to be root?\n", errbuf);
-        return -1;
+        return 1;
     }
+    *res = dev;
+    return 0;
+}
+
+int PrintDefaultDevice() {
+    char* dev;
+    int res = GetDefaultDevice(&dev);
+    if (res)
+        return res;
     printf("Default device:\n%s\n\n", dev);
     return 0;
 }
@@ -28,14 +35,16 @@ int PrintAllDevices() {
     result = pcap_findalldevs(&found_devices, errbuf);
     if (result < 0 || strlen(errbuf) > 0) {
         printf("Device scan error:\n%s\n",errbuf);
-        return -1;
+        return 1;
     }
 
     printf("All devices:\n");
-    while (found_devices != NULL) {
-        printf("%s\n",found_devices->name);
-        found_devices = found_devices->next;
+    struct pcap_if* iter = found_devices;
+    while (iter != NULL) {
+        printf("%s\n", iter->name);
+        iter = iter->next;
     }
+    pcap_freealldevs(found_devices);
     return 0;
 }
 
