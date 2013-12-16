@@ -1,3 +1,3 @@
 all:
-	gcc -g -lpcap main.c -o main.exe
+	gcc -g -lpcap main.c -o test.exe
 

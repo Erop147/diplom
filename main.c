@@ -4,18 +4,35 @@
 #include <unistd.h>
 
 
-int PrintExistingDevices() {
+int PrintDefaultDevice() {
+    char *dev, errbuf[PCAP_ERRBUF_SIZE];
+
+    dev = pcap_lookupdev(errbuf);
+    if (dev == NULL) {
+        fprintf(stderr, "Couldn't find default device: %s\nMay be is it need to be root?\n", errbuf);
+        return -1;
+    }
+    printf("Default device:\n%s\n\n", dev);
+    return 0;
+}
+
+int PrintAllDevices() {
+    int err = PrintDefaultDevice();
+    if (err)
+        return err;
+
     struct pcap_if* found_devices;
     int result;
     char errbuf[PCAP_ERRBUF_SIZE];
     errbuf[0] = 0;
     result = pcap_findalldevs(&found_devices, errbuf);
     if (result < 0 || strlen(errbuf) > 0) {
-        printf("Device scan error:\n%s\nMay be it need to be root?\n",errbuf);
+        printf("Device scan error:\n%s\n",errbuf);
         return -1;
     }
 
-    while(found_devices != NULL) {
+    printf("All devices:\n");
+    while (found_devices != NULL) {
         printf("%s\n",found_devices->name);
         found_devices = found_devices->next;
     }
@@ -41,7 +58,7 @@ int main(int argc, char *argv[])
         switch (c)
         {
         case 'l':
-            return PrintExistingDevices();
+            return PrintAllDevices();
         case 'h':
             PrintHelp(argv[0]);
             return 1;
