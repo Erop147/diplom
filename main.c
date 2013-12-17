@@ -31,9 +31,8 @@ int PrintAllDevices() {
     struct pcap_if* found_devices;
     int result;
     char errbuf[PCAP_ERRBUF_SIZE];
-    errbuf[0] = 0;
     result = pcap_findalldevs(&found_devices, errbuf);
-    if (result < 0 || strlen(errbuf) > 0) {
+    if (result < 0) {
         printf("Device scan error:\n%s\n",errbuf);
         return 1;
     }
