@@ -31,10 +31,14 @@ int PrintAllDevices() {
     struct pcap_if* found_devices;
     int result;
     char errbuf[PCAP_ERRBUF_SIZE];
+    errbuf[0] = 0;
     result = pcap_findalldevs(&found_devices, errbuf);
     if (result < 0) {
-        printf("Device scan error:\n%s\n",errbuf);
+        fprintf(stderr, "Device scan error:\n%s\n", errbuf);
         return 1;
+    }
+    if (errbuf[0]) {
+        fprintf(stderr, "Device scan warning:\n%s\n", errbuf);
     }
 
     printf("All devices:\n");
@@ -57,11 +61,32 @@ void PrintHelp(char* progName) {
     );
 }
 
+void SendTestTraffic(char* device) {
+    /*if (device == NULL) {
+        int res = GetDefaultDevice(device);
+        if (res)
+            return res;
+    }*/
+    char errbuf[PCAP_ERRBUF_SIZE];
+    pcap_t* handle = pcap_open_offline("test.cap", errbuf);
+    const u_char* packet;
+    struct pcap_pkthdr header;
+    int i;
+    for (i = 0; i < 3; ++i) {
+        packet = pcap_next(handle, &header);
+        if (packet == NULL)
+            printf("null\n");
+        else
+            printf("len: %d\n", header.len);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int c;
     int hasArgs = 0;
-    while((c = getopt(argc, argv, "lh")) != -1) {
+    char* device = NULL;
+    while((c = getopt(argc, argv, "lhd:t")) != -1) {
         hasArgs = 1;
         switch (c)
         {
@@ -70,20 +95,16 @@ int main(int argc, char *argv[])
         case 'h':
             PrintHelp(argv[0]);
             return 1;
+        case 'd':
+            device = optarg;
+            break;
         }
     }
+    SendTestTraffic(device);
+    return 0;
     if (!hasArgs) {
         PrintHelp(argv[0]);
         return 1;
     }
-    return 0;
-    char *dev, errbuf[PCAP_ERRBUF_SIZE];
-
-    dev = pcap_lookupdev(errbuf);
-    if (dev == NULL) {
-        fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
-        return(2);
-    }
-    printf("Device: %s\n", dev);
     return 0;
 }
