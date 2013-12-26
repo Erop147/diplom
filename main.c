@@ -161,7 +161,28 @@ void SetDataLen(struct TUDPPacket* packet, uint16_t dataLen) {
     SetUDPCheckSum(packet->IP, packet->UDP);
 }
 
-void SetData(struct TUDPPacket *packet, uint8_t* data, uint16_t dataLen) {
+void SetTTL(struct TUDPPacket* packet, uint8_t ttl) {
+    packet->IP->TTL = ttl;
+    SetIPCheckSum(packet->IP);
+}
+
+void SetIP(struct TUDPPacket* packet, uint8_t* sourceIP, uint8_t* destIP) {
+    int i;
+    for (i = 0; i < 4; ++i) {
+        packet->IP->Source[i] = sourceIP[i];
+        packet->IP->Dest[i] = destIP[i];
+    }
+    SetIPCheckSum(packet->IP);
+    SetUDPCheckSum(packet->IP, packet->UDP);
+}
+
+void SetPort(struct TUDPPacket* packet, uint16_t sourcePort, uint16_t destPort) {
+    packet->UDP->SourcePort = htons(sourcePort);
+    packet->UDP->DestPort = htons(destPort);
+    SetUDPCheckSum(packet->IP, packet->UDP);
+}
+
+void SetData(struct TUDPPacket* packet, uint8_t* data, uint16_t dataLen) {
     if (dataLen > MXUDP) {
         dataLen = MXUDP;
         fprintf(stderr, "too much data");
@@ -171,25 +192,26 @@ void SetData(struct TUDPPacket *packet, uint8_t* data, uint16_t dataLen) {
 }
 
 void SendTestTraffic(char* device) {
-    /*if (device == NULL) {
-        int res = GetDefaultDevice(device);
-        if (res)
-            return res;
-    }*/
     struct TUDPPacket packet;
     InitUDPPacket(&packet);
-    char s[] = "7";
-    SetData(&packet, s, sizeof(s));
+    const int DATASIZE = 100;
+    char data[DATASIZE];
+    memset(data, 'x', sizeof(data));
+    SetData(&packet, data, sizeof(data));
     pcap_t* pd;
     pcap_dumper_t* pdumper;
     struct pcap_pkthdr header;
     pd = pcap_open_dead(DLT_EN10MB, 65535);
     pdumper = pcap_dump_open(pd, "dump.pcap");
-    header.ts.tv_sec = 1;
-    header.ts.tv_usec = 2;
-    header.caplen = packet.Size;
-    header.len = packet.Size;
-    pcap_dump((u_char* ) pdumper, &header, (u_char *) &packet.Ethernet);
+    int i;
+    for (i = 0; i < 1000000; ++i) {
+        SetPort(&packet, 10000 + i%100, 20000 + i%100);
+        header.ts.tv_sec = i;
+        header.ts.tv_usec = 0;
+        header.caplen = packet.Size;
+        header.len = packet.Size;
+        pcap_dump((u_char* ) pdumper, &header, (u_char *) &packet.Ethernet);
+    }
     return;
 /*    char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t* handle = pcap_open_offline("test.cap", errbuf);
