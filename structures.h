@@ -1,3 +1,5 @@
+#ifndef E146_STRUCTURES_H
+#define E146_STRUCTURES_H
 #include <stdint.h>
 
 struct TEthernet {
@@ -36,3 +38,4 @@ struct TUDPPacket
     struct TUDP* UDP;
     uint16_t Size;
 };
+#endif
