@@ -4,9 +4,10 @@
 #include <string.h>
 
 uint8_t SourceMac[6] = {0x00, 0x1d, 0x72, 0xca, 0x0a, 0x49};
-uint8_t DestMac[6] = {0x00, 0x1d, 0x72, 0xca, 0x0a, 0x4a};
-uint8_t SourceIP[4] = {192, 168, 0, 1};
-uint8_t DestIP[4] = {192, 168, 1, 1};
+uint8_t DestMac[6] = {0x1c, 0x7e, 0xe5, 0xe0, 0x5e, 0x12};
+//uint8_t DestMac[6] = {0x5c, 0x26, 0x0a, 0x12, 0x87, 0x35};
+uint8_t SourceIP[4] = {192, 16, 0, 10};
+uint8_t DestIP[4] = {192, 16, 1, 1};
 const int MXUDP = 1472;
 
 uint16_t CalcCheckSum(uint16_t* data, int len, uint32_t sum) {

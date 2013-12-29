@@ -66,50 +66,92 @@ void PrintHelp(char* progName) {
     );
 }
 
+pcap_t* pcap;
+pcap_dumper_t* dumper;
+int offline;
 
-void SendTestTraffic(char* device) {
+int Init(char* name) {
+    if (name[0] == '-' && name[1] == 0) {
+        offline = 1;
+        pcap = pcap_open_dead(DLT_EN10MB, 65535);
+        dumper = pcap_dump_open(pcap, name);
+    } else {
+        offline = 0;
+        if (strcmp(name, "default") == 0) {
+            char* dev;
+            int res = GetDefaultDevice(&dev);
+            if (res)
+                return res;
+            fprintf(stderr, "Using default device: %s\n", dev);
+            name = dev;
+        }
+        char pcap_errbuff[PCAP_ERRBUF_SIZE];
+        pcap_errbuff[0] = 0;
+        pcap =  pcap_open_live(name, BUFSIZ, 0, 0, pcap_errbuff);
+        if (pcap_errbuff[0]) {
+            fprintf(stderr, "%s\n", pcap_errbuff);
+        }
+        if (!pcap)
+            return 1;
+    }
+    return 0;
+}
+
+int Finish() {
+    if (offline) {
+        pcap_dump_close(dumper);
+        pcap_close(pcap);
+    } else {
+        pcap_close(pcap);
+    }
+}
+
+void WaitFor(struct timeval ts) {
+}
+
+int SendPacket(struct TUDPPacket* packet, struct timeval ts) {
+    if (offline) {
+        struct pcap_pkthdr header;
+        header.ts = ts;
+        header.caplen = packet->Size;
+        header.len = packet->Size;
+        pcap_dump((u_char* ) dumper, &header, (u_char *) &packet->Ethernet);
+    } else {
+        WaitFor(ts);
+        if (pcap_inject(pcap, (u_char *) &packet->Ethernet, packet->Size) == -1) {
+            pcap_perror(pcap, 0);
+            pcap_close(pcap);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+int SendTestTraffic(char* device) {
     struct TUDPPacket packet;
     InitUDPPacket(&packet);
-    const int DATASIZE = 100;
+    const int DATASIZE = 1450;
     char data[DATASIZE];
     memset(data, 'x', sizeof(data));
     SetData(&packet, data, sizeof(data));
-    pcap_t* pd;
-    pcap_dumper_t* pdumper;
-    struct pcap_pkthdr header;
-    pd = pcap_open_dead(DLT_EN10MB, 65535);
-    pdumper = pcap_dump_open(pd, "dump.pcap");
     int i;
-    for (i = 0; i < 10; ++i) {
+    int res = Init("default");
+    if (res)
+        return res;
+    struct timeval ts;
+    ts.tv_sec = 0; // seconds from start
+    ts.tv_usec = 0; // microseconds
+    for (i = 0; i < 1000000; ++i) {
         SetPort(&packet, 10000 + i%100, 20000 + i%100);
-        header.ts.tv_sec = i;
-        header.ts.tv_usec = 0;
-        header.caplen = packet.Size;
-        header.len = packet.Size;
-        pcap_dump((u_char* ) pdumper, &header, (u_char *) &packet.Ethernet);
+        res = SendPacket(&packet, ts);
+        if (res)
+            return res;
+//        fprintf(stderr, "%d", i);
     }
-    return;
-/*    char errbuf[PCAP_ERRBUF_SIZE];
-    pcap_t* handle = pcap_open_offline("test.cap", errbuf);
-    const u_char* packet;
-    struct pcap_pkthdr header;
-    int i;
-    for (i = 0; i < 3; ++i) {
-        packet = pcap_next(handle, &header);
-        if (packet == NULL)
-            printf("null\n");
-        else
-        {
-            printf("len: %d\n", header.len);
-            int j;
-            for (j = 0; j < header.len; ++j)
-            {
-                printf("%c", packet[j]);
-            }
-            return;
-        }
-    }
-*/}
+    Finish();
+    return 0;
+}
 
 int main(int argc, char *argv[])
 {
