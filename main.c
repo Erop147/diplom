@@ -1,12 +1,11 @@
 #include "structures.h"
 #include "udp.h"
+#include "ts_util.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <pcap.h>
 #include <unistd.h>
-#include <stdint.h>
-#include <netinet/in.h>
 
 int GetDefaultDevice(char** res) {
     char errbuf[PCAP_ERRBUF_SIZE];
@@ -69,8 +68,12 @@ void PrintHelp(char* progName) {
 pcap_t* pcap;
 pcap_dumper_t* dumper;
 int offline;
+struct timespec starttime;
+struct timespec timenow;
 
 int Init(char* name) {
+    clock_gettime(CLOCK_REALTIME, &starttime);
+    timenow = starttime;
     if (name[0] == '-' && name[1] == 0) {
         offline = 1;
         pcap = pcap_open_dead(DLT_EN10MB, 65535);
@@ -107,6 +110,19 @@ int Finish() {
 }
 
 void WaitFor(struct timeval ts) {
+    struct timespec sendtime;
+    TimevalToTimespec(&ts, &sendtime);
+    sendtime = TsAdd(sendtime, starttime);
+    if (TsCompare(sendtime,timenow) <= 0)
+        return;
+    clock_gettime(CLOCK_REALTIME, &timenow);
+    if (TsCompare(sendtime, timenow) <= 0)
+        return;
+    struct timespec waittime;
+    waittime = TsSubtract(sendtime, timenow);
+    if (nanosleep(&waittime, NULL)) {
+        fprintf(stderr, "nanosleep error\n");
+    }
 }
 
 int SendPacket(struct TUDPPacket* packet, struct timeval ts) {
@@ -147,7 +163,6 @@ int SendTestTraffic(char* device) {
         res = SendPacket(&packet, ts);
         if (res)
             return res;
-//        fprintf(stderr, "%d", i);
     }
     Finish();
     return 0;

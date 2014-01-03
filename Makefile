@@ -3,14 +3,14 @@ CCFLAGS = -Wall
 DFLAGS = -MD
 LD = $(CC)
 LDFLAGS =
-OFILES = main.o udp.o
+OFILES = main.o udp.o ts_util.o
 RM = rm -f
 TARGET = test
 
 all: $(TARGET)
 
 $(TARGET): $(OFILES)
-	$(LD) $(LDFLAGS) $(OFILES) -o $(TARGET) -lpcap
+	$(LD) $(LDFLAGS) $(OFILES) -o $(TARGET) -lpcap -lrt
 
 -include $(OFILES:.o=.d)
 
