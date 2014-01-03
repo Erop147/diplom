@@ -218,7 +218,6 @@ int ManyNetworksTest() {
         networkCount = start + step*testNum;
         if (networkCount == 0)
             networkCount = 1;
-        tv.tv_sec = 1;
         int i;
         for (i = 0; i < packetsPerTest; ++i) {
             WritePacketNum(payload, packetNum);
@@ -233,9 +232,41 @@ int ManyNetworksTest() {
     Finish();
 }
 
+void DifferentPayloadSizeTest() {
+    Init("-");
+    int packetsPerTest = 10;
+    int start = 18;
+    int step = 1;
+    int tests = MXUDP - start + 1;
+    int testNum;
+    uint32_t packetNum = 0;
+    struct TUDPPacket packet;
+    InitUDPPacket(&packet);
+    uint8_t payload[MXUDP];
+    memset(payload, 'x', sizeof(payload));
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    for (testNum = 0; testNum < tests; ++testNum) {
+        int size = start + testNum*step;
+        if (size < 18)
+            size = 18;
+        if (size > MXUDP)
+            size = MXUDP;
+        int i;
+        for (i = 0; i < packetsPerTest; ++i) {
+            WritePacketNum(payload, packetNum);
+            SetData(&packet, payload, size);
+            SendPacket(&packet, tv);
+            ++packetNum;
+        }
+    }
+    Finish();
+}
+
 int main(int argc, char *argv[])
 {
-    ManyNetworksTest();
+    DifferentPayloadSizeTest();
     return 0;
     int c;
     int hasArgs = 0;
