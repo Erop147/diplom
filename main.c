@@ -168,8 +168,75 @@ int SendTestTraffic(char* device) {
     return 0;
 }
 
+uint8_t ReverseBits(uint8_t x) {
+    uint8_t res = 0;
+    int i = 0;
+    for (i = 0; i < 8; ++i) {
+        if (x & (1 << i))
+            res |= 1 << (7 - i);
+    }
+    return res;
+}
+
+void WritePacketNum(char* dest, uint32_t packetNum) {
+    int i;
+    for (i = 0; i < 4; ++i) {
+        dest[i] = packetNum & 255;
+        packetNum >>= 8;
+    }
+}
+
+void WriteReversed(char* dest, uint32_t data, int cnt) {
+    int i;
+    for (i = 0; i < cnt; ++i) {
+        dest[i] = ReverseBits((uint8_t)(data & 255));
+        data >>= 8;
+    }
+}
+
+int ManyNetworksTest() {
+    Init("-");
+    int packetsPerTest = 10;
+    int start = 1;
+    int step = 3;
+    int tests = 10;
+    int testNum;
+    uint32_t networkCount = start;
+    uint32_t packetNum = 0;
+    struct TUDPPacket packet;
+    InitUDPPacket(&packet);
+    uint8_t payload[18];
+    memset(payload, 'x', sizeof(payload));
+    uint8_t sourceIP[4];
+    uint8_t destIP[4];
+    sourceIP[0] = 200;
+    destIP[0] = 201;
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    for (testNum = 0; testNum < tests; ++testNum) {
+        networkCount = start + step*testNum;
+        if (networkCount == 0)
+            networkCount = 1;
+        tv.tv_sec = 1;
+        int i;
+        for (i = 0; i < packetsPerTest; ++i) {
+            WritePacketNum(payload, packetNum);
+            WriteReversed(sourceIP + 1, i % networkCount, 3);
+            WriteReversed(destIP + 1, i % networkCount, 3);
+            SetIP(&packet, sourceIP, destIP);
+            SetData(&packet, payload, sizeof(payload));
+            SendPacket(&packet, tv);
+            ++packetNum;
+        }
+    }
+    Finish();
+}
+
 int main(int argc, char *argv[])
 {
+    ManyNetworksTest();
+    return 0;
     int c;
     int hasArgs = 0;
     char* device = NULL;
@@ -187,8 +254,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    SendTestTraffic(device);
-    return 0;
     if (!hasArgs) {
         PrintHelp(argv[0]);
         return 1;
