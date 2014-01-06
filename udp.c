@@ -5,7 +5,7 @@
 
 uint8_t SourceMac[6] = {0x00, 0x1d, 0x72, 0xca, 0x0a, 0x49};
 uint8_t DestMac[6] = {0x1c, 0x7e, 0xe5, 0xe0, 0x5e, 0x12};
-//uint8_t DestMac[6] = {0x5c, 0x26, 0x0a, 0x12, 0x87, 0x35};
+uint8_t FakeDestMac[6] = {0x5c, 0x26, 0x0a, 0x12, 0x87, 0x35};
 uint8_t SourceIP[4] = {192, 16, 0, 10};
 uint8_t DestIP[4] = {192, 16, 1, 1};
 const int MXUDP = 1472;
@@ -55,15 +55,19 @@ void SetUDPCheckSum(struct TIP* ip, struct TUDP* udp) {
     udp->CheckSum = htons(checkSum);
 }
 
+void SetMac(struct TUDPPacket* packet, uint8_t* source, uint8_t* dest) {
+    int i;
+    for (i = 0; i < 6; ++i) {
+        packet->Ethernet.Source[i] = source[i];
+        packet->Ethernet.Dest[i] = dest[i];
+    }
+}
+
 void InitUDPPacket(struct TUDPPacket* packet) {
     packet->IP = (struct TIP* ) &packet->Ethernet.Payload;
     packet->UDP = (struct TUDP* ) &packet->IP->Payload;
 
-    int i;
-    for (i = 0; i < 6; ++i) {
-        packet->Ethernet.Source[i] = SourceMac[i];
-        packet->Ethernet.Dest[i] = DestMac[i];
-    }
+    SetMac(packet, SourceMac, DestMac);
     packet->Ethernet.Type = htons(0x0800); // IP
 
     struct TIP* ip = packet->IP;
@@ -74,12 +78,7 @@ void InitUDPPacket(struct TUDPPacket* packet) {
     ip->FlagsAndOffset = htons(0);
     ip->TTL = 64;
     ip->Protocol = 0x11; // UDP
-    for (i = 0; i < 4; ++i) {
-        ip->Source[i] = SourceIP[i];
-        ip->Dest[i] = DestIP[i];
-    }
-    SetIPCheckSum(ip);
-
+    SetIP(packet, SourceIP, DestIP);
     packet->UDP->SourcePort = htons(10000);
     packet->UDP->DestPort = htons(10001);
     packet->UDP->Length = htons(8);   // UDP header length

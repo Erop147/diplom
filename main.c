@@ -264,6 +264,70 @@ void DifferentPayloadSizeTest() {
     Finish();
 }
 
+void LowTTLTest() {
+    Init("-");
+    int packetsPerTest = 10;
+    double start = 0;
+    double step = 0.1;
+    int tests = 10;
+    int testNum;
+    uint32_t packetNum = 0;
+    struct TUDPPacket packet;
+    InitUDPPacket(&packet);
+    uint8_t payload[18];
+    memset(payload, 'x', sizeof(payload));
+    struct timeval tv;
+    tv.tv_sec = 0;
+    for (testNum = 0; testNum < tests; ++testNum) {
+        double frenq = start + testNum*step;
+        int badPackets = 0;
+        int i;
+        for (i = 0; i < packetsPerTest; ++i) {
+            WritePacketNum(payload, packetNum);
+            SetData(&packet, payload, sizeof(payload));
+            if (i == 0 || i == packetsPerTest - 1 || badPackets < i*frenq) {
+                SetTTL(&packet, 1);
+            } else {
+                SetTTL(&packet, 64);
+            }
+            SendPacket(&packet, tv);
+        }
+    }
+    Finish();
+}
+
+void BadMacTest() {
+    Init("-");
+    int packetsPerTest = 10;
+    double start = 0;
+    double step = 0.1;
+    int tests = 10;
+    int testNum;
+    uint32_t packetNum = 0;
+    struct TUDPPacket packet;
+    InitUDPPacket(&packet);
+    uint8_t payload[18];
+    memset(payload, 'x', sizeof(payload));
+    struct timeval tv;
+    tv.tv_sec = 0;
+    for (testNum = 0; testNum < tests; ++testNum) {
+        double frenq = start + testNum*step;
+        int badPackets = 0;
+        int i;
+        for (i = 0; i < packetsPerTest; ++i) {
+            WritePacketNum(payload, packetNum);
+            SetData(&packet, payload, sizeof(payload));
+            if (i == 0 || i == packetsPerTest - 1 || badPackets < i*frenq) {
+                SetMac(&packet, SourceMac, DestMac);
+            } else {
+                SetMac(&packet, SourceMac, FakeDestMac);
+            }
+            SendPacket(&packet, tv);
+        }
+    }
+    Finish();
+}
+
 int main(int argc, char *argv[])
 {
     DifferentPayloadSizeTest();

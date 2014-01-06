@@ -5,7 +5,7 @@ LD = $(CC)
 LDFLAGS =
 OFILES = main.o udp.o ts_util.o
 RM = rm -f
-TARGET = test
+TARGET = nettest
 
 all: $(TARGET)
 
