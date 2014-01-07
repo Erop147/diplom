@@ -78,10 +78,10 @@ void InitUDPPacket(struct TUDPPacket* packet) {
     ip->FlagsAndOffset = htons(0);
     ip->TTL = 64;
     ip->Protocol = 0x11; // UDP
-    SetIP(packet, SourceIP, DestIP);
     packet->UDP->SourcePort = htons(10000);
     packet->UDP->DestPort = htons(10001);
     packet->UDP->Length = htons(8);   // UDP header length
+    SetIP(packet, SourceIP, DestIP);
     SetUDPCheckSum(packet->IP, packet->UDP);
     packet->Size = 42;  // All headers, no payload
 }

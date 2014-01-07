@@ -1,9 +1,9 @@
 CC = gcc
 CCFLAGS = -Wall
-DFLAGS = -MD
+DFLAGS = -MD -g
 LD = $(CC)
 LDFLAGS =
-OFILES = main.o udp.o ts_util.o
+OFILES = main.o udp.o ts_util.o tests.o
 RM = rm -f
 TARGET = nettest
 
