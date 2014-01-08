@@ -115,7 +115,8 @@ void WriteReversed(char* dest, uint32_t data, int cnt) {
 }
 
 int ManyNetworksTest(const struct TConfig* config) {
-    Init(config->MainConfig.Device);
+    if (Init(config->MainConfig.Device))
+        return 1;
     int packetsPerTest = 10;
     int start = 1;
     int step = 3;
@@ -152,8 +153,9 @@ int ManyNetworksTest(const struct TConfig* config) {
     Finish();
 }
 
-void DifferentPayloadSizeTest(const struct TConfig* config) {
-    Init(config->MainConfig.Device);
+int DifferentPayloadSizeTest(const struct TConfig* config) {
+    if (Init(config->MainConfig.Device))
+        return 1;
     int packetsPerTest = 10;
     int start = 18;
     int step = 1;
@@ -184,8 +186,9 @@ void DifferentPayloadSizeTest(const struct TConfig* config) {
     Finish();
 }
 
-void LowTTLTest(const struct TConfig* config) {
-    Init(config->MainConfig.Device);
+int LowTTLTest(const struct TConfig* config) {
+    if (Init(config->MainConfig.Device))
+        return 1;
     int packetsPerTest = 10;
     double start = 0;
     double step = 0.1;
@@ -217,8 +220,9 @@ void LowTTLTest(const struct TConfig* config) {
     Finish();
 }
 
-void BadMacTest(const struct TConfig* config) {
-    Init(config->MainConfig.Device);
+int BadMacTest(const struct TConfig* config) {
+    if (Init(config->MainConfig.Device))
+        return 1;
     int packetsPerTest = 10;
     double start = 0;
     double step = 0.1;
@@ -249,5 +253,3 @@ void BadMacTest(const struct TConfig* config) {
     }
     Finish();
 }
-
-

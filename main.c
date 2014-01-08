@@ -94,7 +94,8 @@ int SendTestTraffic(char* device) {
 int main(int argc, char *argv[])
 {
     struct TConfig config;
-    LoadConfig(&config, "config.ini", 0);
+    if (LoadConfig(&config, "config.ini", 0))
+        return 1;
     ManyNetworksTest(&config);
     return 0;
     int c;

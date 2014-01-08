@@ -4,8 +4,8 @@
 #include "config.h"
 
 int ManyNetworksTest(const struct TConfig* config);
-void DifferentPayloadSizeTest(const struct TConfig* config);
-void LowTTLTest(const struct TConfig* config);
-void BadMacTest(const struct TConfig* config);
+int DifferentPayloadSizeTest(const struct TConfig* config);
+int LowTTLTest(const struct TConfig* config);
+int BadMacTest(const struct TConfig* config);
 
 #endif
