@@ -2,6 +2,7 @@
 #include "udp.h"
 #include "ts_util.h"
 #include "tests.h"
+#include "config.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -171,7 +172,8 @@ int SendTestTraffic(char* device) {
 
 int main(int argc, char *argv[])
 {
-    BadMacTest();
+    struct TConfig config;
+    LoadConfig(&config, "config.ini", 0);
     return 0;
     int c;
     int hasArgs = 0;
