@@ -67,85 +67,6 @@ void PrintHelp(char* progName) {
     );
 }
 
-pcap_t* pcap;
-pcap_dumper_t* dumper;
-int offline;
-struct timespec starttime;
-struct timespec timenow;
-
-int Init(char* name) {
-    clock_gettime(CLOCK_REALTIME, &starttime);
-    timenow = starttime;
-    if (name[0] == '-' && name[1] == 0) {
-        offline = 1;
-        pcap = pcap_open_dead(DLT_EN10MB, 65535);
-        dumper = pcap_dump_open(pcap, name);
-    } else {
-        offline = 0;
-        if (strcmp(name, "default") == 0) {
-            char* dev;
-            int res = GetDefaultDevice(&dev);
-            if (res)
-                return res;
-            fprintf(stderr, "Using default device: %s\n", dev);
-            name = dev;
-        }
-        char pcap_errbuff[PCAP_ERRBUF_SIZE];
-        pcap_errbuff[0] = 0;
-        pcap =  pcap_open_live(name, BUFSIZ, 0, 0, pcap_errbuff);
-        if (pcap_errbuff[0]) {
-            fprintf(stderr, "%s\n", pcap_errbuff);
-        }
-        if (!pcap)
-            return 1;
-    }
-    return 0;
-}
-
-int Finish() {
-    if (offline) {
-        pcap_dump_close(dumper);
-        pcap_close(pcap);
-    } else {
-        pcap_close(pcap);
-    }
-}
-
-void WaitFor(struct timeval ts) {
-    struct timespec sendtime;
-    TimevalToTimespec(&ts, &sendtime);
-    sendtime = TsAdd(sendtime, starttime);
-    if (TsCompare(sendtime,timenow) <= 0)
-        return;
-    clock_gettime(CLOCK_REALTIME, &timenow);
-    if (TsCompare(sendtime, timenow) <= 0)
-        return;
-    struct timespec waittime;
-    waittime = TsSubtract(sendtime, timenow);
-    if (nanosleep(&waittime, NULL)) {
-        fprintf(stderr, "nanosleep error\n");
-    }
-}
-
-int SendPacket(struct TUDPPacket* packet, struct timeval ts) {
-    if (offline) {
-        struct pcap_pkthdr header;
-        header.ts = ts;
-        header.caplen = packet->Size;
-        header.len = packet->Size;
-        pcap_dump((u_char* ) dumper, &header, (u_char *) &packet->Ethernet);
-    } else {
-        WaitFor(ts);
-        if (pcap_inject(pcap, (u_char *) &packet->Ethernet, packet->Size) == -1) {
-            pcap_perror(pcap, 0);
-            pcap_close(pcap);
-            return 1;
-        }
-    }
-    return 0;
-}
-
-
 int SendTestTraffic(char* device) {
     struct TUDPPacket packet;
     InitUDPPacket(&packet);
@@ -174,6 +95,7 @@ int main(int argc, char *argv[])
 {
     struct TConfig config;
     LoadConfig(&config, "config.ini", 0);
+    ManyNetworksTest(&config);
     return 0;
     int c;
     int hasArgs = 0;
