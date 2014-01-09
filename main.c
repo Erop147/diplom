@@ -96,8 +96,16 @@ int main(int argc, char *argv[])
     struct TConfig config;
     if (LoadConfig(&config, "config.ini", 0))
         return 1;
-    ManyNetworksTest(&config);
-    return 0;
+    if (strcmp(config.MainConfig.Test, "many_networks") == 0)
+        return ManyNetworksTest(&config);
+    if (strcmp(config.MainConfig.Test, "different_payload") == 0)
+        return DifferentPayloadSizeTest(&config);
+    if (strcmp(config.MainConfig.Test, "lower_ttl") == 0)
+        return LowTTLTest(&config);
+    if (strcmp(config.MainConfig.Test, "bad_mac") == 0)
+        return BadMacTest(&config);
+    fprintf(stderr, "Unknown test: %s\n", config.MainConfig.Test);
+    return 1;
     int c;
     int hasArgs = 0;
     char* device = NULL;

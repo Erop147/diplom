@@ -86,21 +86,19 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
         return 1;
     if (ReadIPFromStr(iniparser_getstring(dict, "main:dest_ip", NULL), (uint8_t*) &config->MainConfig.DestIP, "main:dest_ip:"))
         return 1;
-
     if (ReadString(iniparser_getstring(dict, "main:device", NULL), config->MainConfig.Device, sizeof(config->MainConfig.Device), "main:device:"))
+        return 1;
+    if (ReadString(iniparser_getstring(dict, "main:test", NULL), config->MainConfig.Test, sizeof(config->MainConfig.Test), "main:test:"))
         return 1;
 
 ///// Many Networks Config /////
 
     if (ReadInt(iniparser_getstring(dict, "many_networks:packets_per_test", NULL), &config->ManyNetworkConfig.PacketsPerTest, "many_networks:packets_per_test:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "many_networks:start", NULL), &config->ManyNetworkConfig.Start, "many_networks:start:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "many_networks:step", NULL), &config->ManyNetworkConfig.Step, "many_networks:step:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "many_networks:tests_count", NULL), &config->ManyNetworkConfig.TestsCount, "many_networks:tests_count:"))
         return 1;
 
@@ -108,13 +106,10 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
 
     if (ReadInt(iniparser_getstring(dict, "different_payload:packets_per_test", NULL), &config->DifferentPayloadConfig.PacketsPerTest, "different_payload:packets_per_test:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "different_payload:start", NULL), &config->DifferentPayloadConfig.Start, "different_payload:start:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "different_payload:step", NULL), &config->DifferentPayloadConfig.Step, "different_payload:step:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "different_payload:tests_count", NULL), &config->DifferentPayloadConfig.TestsCount, "different_pauload:tests_count:"))
         return 1;
 
@@ -122,13 +117,10 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
 
     if (ReadInt(iniparser_getstring(dict, "low_ttl:packets_per_test", NULL), &config->LowTTLConfig.PacketsPerTest, "low_ttl:packets_per_test:"))
         return 1;
-
     if (ReadDouble(iniparser_getstring(dict, "low_ttl:start", NULL), &config->LowTTLConfig.Start, "low_ttl:start:"))
         return 1;
-
     if (ReadDouble(iniparser_getstring(dict, "low_ttl:step", NULL), &config->LowTTLConfig.Step, "low_ttl:step:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "low_ttl:tests_count", NULL), &config->LowTTLConfig.TestsCount, "low_ttl:tests_count:"))
         return 1;
 
@@ -136,13 +128,10 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
 
     if (ReadInt(iniparser_getstring(dict, "bad_mac:packets_per_test", NULL), &config->BadMacConfig.PacketsPerTest, "bad_mac:packets_per_test:"))
         return 1;
-
     if (ReadDouble(iniparser_getstring(dict, "bad_mac:start", NULL), &config->BadMacConfig.Start, "bad_mac:start:"))
         return 1;
-
     if (ReadDouble(iniparser_getstring(dict, "bad_mac:step", NULL), &config->BadMacConfig.Step, "bad_mac:step:"))
         return 1;
-
     if (ReadInt(iniparser_getstring(dict, "bad_mac:tests_count", NULL), &config->BadMacConfig.TestsCount, "bad_mac:tests_count:"))
         return 1;
 
@@ -157,6 +146,7 @@ const char defaultConf[][2][100] = {
         {"main:source_ip", "192.168.0.10"},
         {"main:dest_ip", "192.168.1.11"},
         {"main:device", "-  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
+        {"main:test", "many_networks"},
         {"many_networks:packets_per_test", "10"},
         {"many_networks:start", "1"},
         {"many_networks:step", "3"},
@@ -196,4 +186,5 @@ int WriteDefaultConfig(const char* fileName) {
 //    FILE* f = fopen(fileName, "w");
     iniparser_dump_ini(dict, stdout);
     iniparser_freedict(dict);
+    return 0;
 }

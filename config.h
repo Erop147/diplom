@@ -10,6 +10,7 @@ struct TMainConfig {
     uint8_t SourceIP[6];
     uint8_t DestIP[6];
     char Device[64];
+    char Test[64];
 };
 
 struct TManyNetworkConfig {
