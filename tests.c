@@ -117,10 +117,10 @@ void WriteReversed(char* dest, uint32_t data, int cnt) {
 int ManyNetworksTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = 10;
-    int start = 1;
-    int step = 3;
-    int tests = 10;
+    int packetsPerTest = config->ManyNetworkConfig.PacketsPerTest;
+    int start = config->ManyNetworkConfig.Start;
+    int step = config->ManyNetworkConfig.Step;
+    int tests = config->ManyNetworkConfig.TestsCount;
     int testNum;
     uint32_t networkCount = start;
     uint32_t packetNum = 0;
@@ -156,10 +156,10 @@ int ManyNetworksTest(const struct TConfig* config) {
 int DifferentPayloadSizeTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = 10;
-    int start = 18;
-    int step = 1;
-    int tests = MXUDP - start + 1;
+    int packetsPerTest = config->DifferentPayloadConfig.PacketsPerTest;
+    int start = config->DifferentPayloadConfig.Start;
+    int step = config->DifferentPayloadConfig.Step;
+    int tests = config->DifferentPayloadConfig.TestsCount;
     int testNum;
     uint32_t packetNum = 0;
     struct TUDPPacket packet;
@@ -189,10 +189,10 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
 int LowTTLTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = 10;
-    double start = 0;
-    double step = 0.1;
-    int tests = 10;
+    int packetsPerTest = config->LowTTLConfig.PacketsPerTest;
+    double start = config->LowTTLConfig.Start;
+    double step = config->LowTTLConfig.Step;
+    int tests = config->LowTTLConfig.TestsCount;
     int testNum;
     uint32_t packetNum = 0;
     struct TUDPPacket packet;
@@ -223,10 +223,10 @@ int LowTTLTest(const struct TConfig* config) {
 int BadMacTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = 10;
-    double start = 0;
-    double step = 0.1;
-    int tests = 10;
+    int packetsPerTest = config->BadMacConfig.PacketsPerTest;
+    double start = config->BadMacConfig.Start;
+    double step = config->BadMacConfig.Step;
+    int tests = config->BadMacConfig.TestsCount;
     int testNum;
     uint32_t packetNum = 0;
     struct TUDPPacket packet;

@@ -13,19 +13,36 @@ struct TMainConfig {
 };
 
 struct TManyNetworkConfig {
-    int x;
+    int PacketsPerTest;
+    int Start;
+    int Step;
+    int TestsCount;
+};
+
+struct TDifferentPayloadConfig {
+    int PacketsPerTest;
+    int Start;
+    int Step;
+    int TestsCount;
 };
 
 struct TLowTTLConfig {
-    int x;
+    int PacketsPerTest;
+    double Start;
+    double Step;
+    int TestsCount;
 };
 
 struct TBadMacConfig {
-    int x;
+    int PacketsPerTest;
+    double Start;
+    double Step;
+    int TestsCount;
 };
 
 struct TConfig {
     struct TMainConfig MainConfig;
+    struct TDifferentPayloadConfig DifferentPayloadConfig;
     struct TManyNetworkConfig ManyNetworkConfig;
     struct TLowTTLConfig LowTTLConfig;
     struct TBadMacConfig BadMacConfig;
