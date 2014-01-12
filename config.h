@@ -11,31 +11,28 @@ struct TMainConfig {
     uint8_t DestIP[6];
     char Device[64];
     char Test[64];
+    int PacketsPerTest;
 };
 
 struct TManyNetworkConfig {
-    int PacketsPerTest;
     int Start;
     int Step;
     int TestsCount;
 };
 
 struct TDifferentPayloadConfig {
-    int PacketsPerTest;
     int Start;
     int Step;
     int TestsCount;
 };
 
 struct TLowTTLConfig {
-    int PacketsPerTest;
     double Start;
     double Step;
     int TestsCount;
 };
 
 struct TBadMacConfig {
-    int PacketsPerTest;
     double Start;
     double Step;
     int TestsCount;

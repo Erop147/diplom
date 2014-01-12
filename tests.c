@@ -2,6 +2,7 @@
 #include "udp.h"
 #include "structures.h"
 #include "ts_util.h"
+#include "macroses.h"
 
 #include <unistd.h>
 #include <string.h>
@@ -117,7 +118,7 @@ void WriteReversed(char* dest, uint32_t data, int cnt) {
 int ManyNetworksTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = config->ManyNetworkConfig.PacketsPerTest;
+    int packetsPerTest = config->MainConfig.PacketsPerTest;
     int start = config->ManyNetworkConfig.Start;
     int step = config->ManyNetworkConfig.Step;
     int tests = config->ManyNetworkConfig.TestsCount;
@@ -156,7 +157,7 @@ int ManyNetworksTest(const struct TConfig* config) {
 int DifferentPayloadSizeTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = config->DifferentPayloadConfig.PacketsPerTest;
+    int packetsPerTest = config->MainConfig.PacketsPerTest;
     int start = config->DifferentPayloadConfig.Start;
     int step = config->DifferentPayloadConfig.Step;
     int tests = config->DifferentPayloadConfig.TestsCount;
@@ -189,7 +190,7 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
 int LowTTLTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = config->LowTTLConfig.PacketsPerTest;
+    int packetsPerTest = config->MainConfig.PacketsPerTest;
     double start = config->LowTTLConfig.Start;
     double step = config->LowTTLConfig.Step;
     int tests = config->LowTTLConfig.TestsCount;
@@ -223,7 +224,7 @@ int LowTTLTest(const struct TConfig* config) {
 int BadMacTest(const struct TConfig* config) {
     if (Init(config->MainConfig.Device))
         return 1;
-    int packetsPerTest = config->BadMacConfig.PacketsPerTest;
+    int packetsPerTest = config->MainConfig.PacketsPerTest;
     double start = config->BadMacConfig.Start;
     double step = config->BadMacConfig.Step;
     int tests = config->BadMacConfig.TestsCount;
@@ -253,3 +254,19 @@ int BadMacTest(const struct TConfig* config) {
     }
     Finish();
 }
+
+TTestFuncPointer Tests[] = {
+    &ManyNetworksTest,
+    &DifferentPayloadSizeTest,
+    &LowTTLTest,
+    &BadMacTest
+};
+
+int TestsCount = ARRAY_SIZE(Tests);
+
+char TestNames[][32] = {
+    "many_networks",
+    "different_payload",
+    "low_ttl",
+    "bad_mac"
+};

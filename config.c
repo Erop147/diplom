@@ -1,9 +1,8 @@
 #include "config.h"
 #include "iniparser.h"
+#include "macroses.h"
 
 #include <stdio.h>
-
-#define ARRAY_SIZE(array) sizeof(array)/sizeof(array[0])
 
 int ReadMacFromStr(const char* str, uint8_t* mac, const char* errpref) {
     if (str == NULL) {
@@ -90,11 +89,11 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
         return 1;
     if (ReadString(iniparser_getstring(dict, "main:test", NULL), config->MainConfig.Test, sizeof(config->MainConfig.Test), "main:test:"))
         return 1;
+    if (ReadInt(iniparser_getstring(dict, "main:packets_per_test", NULL), &config->MainConfig.PacketsPerTest, "main:packets_per_test:"))
+        return 1;
 
 ///// Many Networks Config /////
 
-    if (ReadInt(iniparser_getstring(dict, "many_networks:packets_per_test", NULL), &config->ManyNetworkConfig.PacketsPerTest, "many_networks:packets_per_test:"))
-        return 1;
     if (ReadInt(iniparser_getstring(dict, "many_networks:start", NULL), &config->ManyNetworkConfig.Start, "many_networks:start:"))
         return 1;
     if (ReadInt(iniparser_getstring(dict, "many_networks:step", NULL), &config->ManyNetworkConfig.Step, "many_networks:step:"))
@@ -104,8 +103,6 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
 
 ///// Different Payload Config /////
 
-    if (ReadInt(iniparser_getstring(dict, "different_payload:packets_per_test", NULL), &config->DifferentPayloadConfig.PacketsPerTest, "different_payload:packets_per_test:"))
-        return 1;
     if (ReadInt(iniparser_getstring(dict, "different_payload:start", NULL), &config->DifferentPayloadConfig.Start, "different_payload:start:"))
         return 1;
     if (ReadInt(iniparser_getstring(dict, "different_payload:step", NULL), &config->DifferentPayloadConfig.Step, "different_payload:step:"))
@@ -115,8 +112,6 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
 
 ///// Low TTL Config /////
 
-    if (ReadInt(iniparser_getstring(dict, "low_ttl:packets_per_test", NULL), &config->LowTTLConfig.PacketsPerTest, "low_ttl:packets_per_test:"))
-        return 1;
     if (ReadDouble(iniparser_getstring(dict, "low_ttl:start", NULL), &config->LowTTLConfig.Start, "low_ttl:start:"))
         return 1;
     if (ReadDouble(iniparser_getstring(dict, "low_ttl:step", NULL), &config->LowTTLConfig.Step, "low_ttl:step:"))
@@ -126,8 +121,6 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
 
 ///// Bad Mac Config /////
 
-    if (ReadInt(iniparser_getstring(dict, "bad_mac:packets_per_test", NULL), &config->BadMacConfig.PacketsPerTest, "bad_mac:packets_per_test:"))
-        return 1;
     if (ReadDouble(iniparser_getstring(dict, "bad_mac:start", NULL), &config->BadMacConfig.Start, "bad_mac:start:"))
         return 1;
     if (ReadDouble(iniparser_getstring(dict, "bad_mac:step", NULL), &config->BadMacConfig.Step, "bad_mac:step:"))
@@ -147,19 +140,16 @@ const char defaultConf[][2][100] = {
         {"main:dest_ip", "192.168.1.11"},
         {"main:device", "-  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
         {"main:test", "many_networks"},
-        {"many_networks:packets_per_test", "10"},
+        {"main:packets_per_test", "10"},
         {"many_networks:start", "1"},
         {"many_networks:step", "3"},
         {"many_networks:test_count", "10"},
-        {"different_pauload:packets_per_test", "10"},
         {"different_pauload:start", "18"},
         {"different_pauload:step", "1"},
         {"different_pauload:test_count", "1470"},
-        {"low_ttl:packets_per_test", "10"},
         {"low_ttl:start", "0"},
         {"low_ttl:step", "0.1"},
         {"low_ttl:test_count", "10"},
-        {"bad_mac:packets_per_test", "10"},
         {"bad_mac:start", "0"},
         {"bad_mac:step", "0.1"},
         {"bad_mac:test_count", "10"}
