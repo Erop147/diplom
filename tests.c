@@ -50,7 +50,7 @@ int SendPacket(struct TUDPPacket* packet, struct timeval ts) {
     return 0;
 }
 
-int Init(const char* name) {
+int InitWriter(const char* name) {
     clock_gettime(CLOCK_REALTIME, &starttime);
     timenow = starttime;
     if (name[0] == '-' && name[1] == 0) {
@@ -79,7 +79,7 @@ int Init(const char* name) {
     return 0;
 }
 
-int Finish() {
+int FinishWriter() {
     if (offline) {
         pcap_dump_close(dumper);
         pcap_close(pcap);
@@ -107,6 +107,16 @@ void WritePacketNum(char* dest, uint32_t packetNum) {
     }
 }
 
+uint32_t ReadPacketNum(char* src) {
+    int i;
+    uint32_t res = 0;
+    for (i = 3; i >= 0; --i) {
+        res |= src[i];
+        res <<= 8;
+    }
+    return res;
+}
+
 void WriteReversed(char* dest, uint32_t data, int cnt) {
     int i;
     for (i = 0; i < cnt; ++i) {
@@ -116,7 +126,7 @@ void WriteReversed(char* dest, uint32_t data, int cnt) {
 }
 
 int ManyNetworksTest(const struct TConfig* config) {
-    if (Init(config->MainConfig.Device))
+    if (InitWriter(config->MainConfig.Device))
         return 1;
     int packetsPerTest = config->MainConfig.PacketsPerTest;
     int start = config->ManyNetworkConfig.Start;
@@ -151,11 +161,11 @@ int ManyNetworksTest(const struct TConfig* config) {
             ++packetNum;
         }
     }
-    Finish();
+    FinishWriter();
 }
 
 int DifferentPayloadSizeTest(const struct TConfig* config) {
-    if (Init(config->MainConfig.Device))
+    if (InitWriter(config->MainConfig.Device))
         return 1;
     int packetsPerTest = config->MainConfig.PacketsPerTest;
     int start = config->DifferentPayloadConfig.Start;
@@ -184,11 +194,11 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
             ++packetNum;
         }
     }
-    Finish();
+    FinishWriter();
 }
 
 int LowTTLTest(const struct TConfig* config) {
-    if (Init(config->MainConfig.Device))
+    if (InitWriter(config->MainConfig.Device))
         return 1;
     int packetsPerTest = config->MainConfig.PacketsPerTest;
     double start = config->LowTTLConfig.Start;
@@ -218,11 +228,11 @@ int LowTTLTest(const struct TConfig* config) {
             SendPacket(&packet, tv);
         }
     }
-    Finish();
+    FinishWriter();
 }
 
 int BadMacTest(const struct TConfig* config) {
-    if (Init(config->MainConfig.Device))
+    if (InitWriter(config->MainConfig.Device))
         return 1;
     int packetsPerTest = config->MainConfig.PacketsPerTest;
     double start = config->BadMacConfig.Start;
@@ -252,7 +262,7 @@ int BadMacTest(const struct TConfig* config) {
             SendPacket(&packet, tv);
         }
     }
-    Finish();
+    FinishWriter();
 }
 
 TTestFuncPointer Tests[] = {

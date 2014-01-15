@@ -59,54 +59,44 @@ int PrintAllDevices() {
 
 void PrintHelp(char* progName) {
     fprintf(stderr,
-        "USAGE: %s [-lh]\n"
+        "USAGE: %s [-lh] [-f config] [-m mode]\n"
         "\n"
-        "-l    print list of suitable devices. Must be root\n"
-        "-h    print this help\n"
+        "-l          print list of suitable devices. Must be root\n"
+        "-h          print this help\n"
+        "-f config   file with config, default: config.ini"
+        "            creates default if it doesn't exists"
+        "-m mode     mode can be write or read"
+        "            write - sends tests to net or writes it"
+        "            to stdout in pcap format"
+        "            read - reads from stdout or net"
         , progName
     );
 }
 
-int SendTestTraffic(char* device) {
-    struct TUDPPacket packet;
-    InitUDPPacket(&packet);
-    const int DATASIZE = 1450;
-    char data[DATASIZE];
-    memset(data, 'x', sizeof(data));
-    SetData(&packet, data, sizeof(data));
+int WriteTest(struct TConfig* config) {
     int i;
-    int res = Init("default");
-    if (res)
-        return res;
-    struct timeval ts;
-    ts.tv_sec = 0; // seconds from start
-    ts.tv_usec = 0; // microseconds
-    for (i = 0; i < 1000000; ++i) {
-        SetPort(&packet, 10000 + i%100, 20000 + i%100);
-        res = SendPacket(&packet, ts);
-        if (res)
-            return res;
+    for (i = 0; i < TestsCount; ++i) {
+        if (strcmp(config->MainConfig.Test, TestNames[i]) == 0)
+            return (*Tests[i])(config);
     }
-    Finish();
+    fprintf(stderr, "Unknown test: %s\n", config->MainConfig.Test);
+    return 1;
+}
+
+int ReadTest(struct TConfig* config) {
     return 0;
 }
 
+char defaultConfig[] = "config.ini";
+char defaultMode[] = "";
 int main(int argc, char *argv[])
 {
-    struct TConfig config;
-    if (LoadConfig(&config, "config.ini", 0))
-        return 1;
-    int i;
-    for (i = 0; i < TestsCount; ++i) {
-        if (strcmp(config.MainConfig.Test, TestNames[i]) == 0)
-            return (*Tests[i])(&config);
-    }
-    fprintf(stderr, "Unknown test: %s\n", config.MainConfig.Test);
-    return 1;
     int c;
     int hasArgs = 0;
-    char* device = NULL;
-    while((c = getopt(argc, argv, "lhd:t")) != -1) {
+    char* configFile = NULL;
+    char* mode = defaultMode;
+
+    while((c = getopt(argc, argv, "lhf:m:")) != -1) {
         hasArgs = 1;
         switch (c)
         {
@@ -115,8 +105,11 @@ int main(int argc, char *argv[])
         case 'h':
             PrintHelp(argv[0]);
             return 1;
-        case 'd':
-            device = optarg;
+        case 'f':
+            configFile = optarg;
+            break;
+        case 'm':
+            mode = optarg;
             break;
         }
     }
@@ -124,5 +117,19 @@ int main(int argc, char *argv[])
         PrintHelp(argv[0]);
         return 1;
     }
-    return 0;
+    int createMode = 0;
+    if (configFile == NULL) {
+        createMode = 1;
+        configFile = defaultConfig;
+    }
+    struct TConfig config;
+    if (LoadConfig(&config, configFile, createMode))
+        return 1;
+    if (strcmp(mode, "write") == 0)
+        return WriteTest(&config);
+    if (strcmp(mode, "read") == 0)
+        return ReadTest(&config);
+    fprintf(stderr, "Unknown mode: %s\n", mode);
+    PrintHelp(argv[0]);
+    return 1;
 }
