@@ -79,6 +79,45 @@ int InitWriter(const char* name) {
     return 0;
 }
 
+int InitReader(const char* name) {
+    clock_gettime(CLOCK_REALTIME, &starttime);
+    timenow = starttime;
+    char pcap_errbuff[PCAP_ERRBUF_SIZE];
+    pcap_errbuff[0] = 0;
+    if (name[0] == '-' && name[1] == 0) {
+        offline = 1;
+        pcap = pcap_open_offline(name, pcap_errbuff);
+    } else {
+        offline = 0;
+        pcap = pcap_open_live(name, BUFSIZ, 0, 0, pcap_errbuff);
+    }
+    if (pcap_errbuff[0]) {
+        fprintf(stderr, "%s\n", pcap_errbuff);
+    }
+    if (!pcap)
+        return 1;
+    return 0;
+}
+
+void ReaderCallback(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
+    if (pkthdr->len < 50)
+        return;
+    struct TEthernet* eth = (struct TEthernet*) packet;
+    struct TIP* ip = (struct TIP*) eth->Payload;
+    struct TUDP* udp = (struct TUDP*) ip->Payload;
+    int32_t packetNum = ReadPacketNum(udp->Payload);
+    if (packetNum == -1)
+        return;
+    fprintf(stdout, "%03d, ", packetNum);
+    fflush(stdout);
+}
+
+int ReadPackets(const struct TConfig* config) {
+    if (InitReader(config->MainConfig.Device))
+        return 1;
+    pcap_loop(pcap, -1, ReaderCallback, NULL);
+}
+
 int FinishWriter() {
     if (offline) {
         pcap_dump_close(dumper);
@@ -99,25 +138,38 @@ uint8_t ReverseBits(uint8_t x) {
     return res;
 }
 
-void WritePacketNum(char* dest, uint32_t packetNum) {
+void WriteIntToBytes(char* dest, int32_t val) {
     int i;
     for (i = 0; i < 4; ++i) {
-        dest[i] = packetNum & 255;
-        packetNum >>= 8;
+        dest[i] = val & 255;
+        val >>= 8;
     }
 }
 
-uint32_t ReadPacketNum(char* src) {
+const int32_t magic = 0x64ab83cd;
+
+void WritePacketNum(char* dest, int32_t packetNum) {
+    WriteIntToBytes(dest, magic);
+    WriteIntToBytes(dest + 4, packetNum);
+}
+
+int32_t ReadIntFromBytes(uint8_t* src) {
     int i;
     uint32_t res = 0;
     for (i = 3; i >= 0; --i) {
-        res |= src[i];
         res <<= 8;
+        res |= src[i];
     }
     return res;
 }
 
-void WriteReversed(char* dest, uint32_t data, int cnt) {
+int32_t ReadPacketNum(char* src) {
+    if (ReadIntFromBytes(src) != magic)
+        return -1;
+    return ReadIntFromBytes(src + 4);
+}
+
+void WriteReversed(char* dest, int32_t data, int cnt) {
     int i;
     for (i = 0; i < cnt; ++i) {
         dest[i] = ReverseBits((uint8_t)(data & 255));

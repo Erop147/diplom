@@ -63,12 +63,12 @@ void PrintHelp(char* progName) {
         "\n"
         "-l          print list of suitable devices. Must be root\n"
         "-h          print this help\n"
-        "-f config   file with config, default: config.ini"
-        "            creates default if it doesn't exists"
-        "-m mode     mode can be write or read"
-        "            write - sends tests to net or writes it"
-        "            to stdout in pcap format"
-        "            read - reads from stdout or net"
+        "-f config   file with config, default: config.ini\n"
+        "            creates default if it doesn't exists\n"
+        "-m mode     mode can be write or read\n"
+        "            write - sends tests to net or writes it\n"
+        "            to stdout in pcap format\n"
+        "            read - reads from stdout or net\n"
         , progName
     );
 }
@@ -84,7 +84,7 @@ int WriteTest(struct TConfig* config) {
 }
 
 int ReadTest(struct TConfig* config) {
-    return 0;
+    return ReadPackets(config);
 }
 
 char defaultConfig[] = "config.ini";
