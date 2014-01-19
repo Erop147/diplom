@@ -11,7 +11,7 @@ int ReadMacFromStr(const char* str, uint8_t* mac, const char* errpref) {
     }
     int i;
     if (strlen(str) != 12) {
-        fprintf(stderr, "%s length must be 12 hexadecimal symbols, but was %ld\n", errpref, strlen(str));
+        fprintf(stderr, "%s length must be 12 hexadecimal symbols, but was %d\n", errpref, (int)strlen(str));
         return 1;
     }
     for (i = 0; i < 6; ++i) {
