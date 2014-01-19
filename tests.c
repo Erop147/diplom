@@ -142,7 +142,7 @@ void PrintStat(int update) {
         printf("\r");
     else
         printf("\n");
-    printf("%4d %8d %10.2lf ", CurrentTest, Recived, PacketsPerTest*100.0/PacketsPerTest);
+    printf("%4d %8d %10.2lf ", CurrentTest, Recived, Recived*100.0/PacketsPerTest);
     if (Recived == 0)
         Recived = 1;
     double tm = GetTestTime();
