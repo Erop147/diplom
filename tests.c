@@ -92,8 +92,10 @@ const char ColumnRecived[] = "Recived";
 const char ColumnRecivedPercent[] = "Recived %";
 const char ColumnAvgSize[] = "AVG size";
 const char ColumnAvgPayload[] = "AVG payload";
+const char ColumnTime[] = "Time";
 const char ColumnSpeed[] = "Speed Mbit/sec";
 const char ColumnPayloadSpeed[] = "Payload speed Mbit/sec";
+const char ColumnPPS[] = "Packets per sec";
 
 int InitReader(const char* name) {
     CurrentTest = 0;
@@ -140,12 +142,12 @@ void PrintStat(int update) {
     printf("%4d %8d %10.2lf ", CurrentTest, Recived, PacketsPerTest*100.0/PacketsPerTest);
     if (Recived == 0)
         Recived = 1;
-    printf("%9.2lf %12.2lf ", SumLen/Recived, SumPayload/Recived);
     double tm = GetTestTime();
+    printf("%9.2lf %12.2lf %10.4lf ", SumLen/Recived, SumPayload/Recived, tm);
     if (tm < 1e-9)
         tm = 1e-9;
     const int MBITDIV = (1<<20)/8;
-    printf("%15.2lf %23.2lf", SumLen/tm/MBITDIV, SumPayload/tm/MBITDIV);
+    printf("%15.2lf %23.2lf %16.2lf", SumLen/tm/MBITDIV, SumPayload/tm/MBITDIV, Recived/tm);
     if (!update)
         fflush(stdout);
 }
@@ -186,8 +188,8 @@ int ReadPackets(const struct TConfig* config) {
     if (InitReader(config->MainConfig.Device))
         return 1;
     printf("%4s %8s %10s ", ColumnTest, ColumnRecived, ColumnRecivedPercent);
-    printf("%9s %12s ", ColumnAvgSize, ColumnAvgPayload);
-    printf("%15s %23s ", ColumnSpeed, ColumnPayloadSpeed);
+    printf("%9s %12s %10s ", ColumnAvgSize, ColumnAvgPayload, ColumnTime);
+    printf("%15s %23s %16s", ColumnSpeed, ColumnPayloadSpeed, ColumnPPS);
     pcap_loop(pcap, -1, ReaderCallback, NULL);
     puts("");
 }
