@@ -190,6 +190,7 @@ int ReadPackets(const struct TConfig* config) {
     printf("%4s %8s %10s ", ColumnTest, ColumnRecived, ColumnRecivedPercent);
     printf("%9s %12s %10s ", ColumnAvgSize, ColumnAvgPayload, ColumnTime);
     printf("%15s %23s %16s", ColumnSpeed, ColumnPayloadSpeed, ColumnPPS);
+    fflush(stdout);
     pcap_loop(pcap, -1, ReaderCallback, NULL);
     puts("");
 }
