@@ -367,6 +367,7 @@ int LowTTLTest(const struct TConfig* config) {
                 SetTTL(&packet, 64);
             }
             SendPacket(&packet, tv);
+            packetNum++;
         }
         fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);
     }
@@ -401,12 +402,13 @@ int BadMacTest(const struct TConfig* config) {
             WritePacketNum(payload, packetNum);
             SetData(&packet, payload, sizeof(payload));
             if (i != 0 && i != packetsPerTest - 1 && badPackets < i*frenq) {
-                SetMac(&packet, SourceMac, DestMac);
+                SetMac(&packet, SourceMac, FakeDestMac);
                 ++badPackets;
             } else {
-                SetMac(&packet, SourceMac, FakeDestMac);
+                SetMac(&packet, SourceMac, DestMac);
             }
             SendPacket(&packet, tv);
+            packetNum++;
         }
         fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);
     }
