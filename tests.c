@@ -79,7 +79,24 @@ int InitWriter(const char* name) {
     return 0;
 }
 
+uint32_t PacketsPerTest;
+int CurrentTest;
+uint32_t Recived;
+int HasFirst;
+double SumLen;
+double SumPayload;
+double FirstTime;
+double LastTime;
+const char ColumnTest[] = "Test";
+const char ColumnRecived[] = "Recived";
+const char ColumnRecivedPercent[] = "Recived %";
+const char ColumnAvgSize[] = "AVG size";
+const char ColumnAvgPayload[] = "AVG payload";
+const char ColumnSpeed[] = "Speed Mbit/sec";
+const char ColumnPayloadSpeed[] = "Payload speed Mbit/sec";
+
 int InitReader(const char* name) {
+    CurrentTest = 0;
     clock_gettime(CLOCK_REALTIME, &starttime);
     timenow = starttime;
     char pcap_errbuff[PCAP_ERRBUF_SIZE];
@@ -99,6 +116,40 @@ int InitReader(const char* name) {
     return 0;
 }
 
+int32_t GetTestNum(int32_t packetNum) {
+    return packetNum / PacketsPerTest;
+}
+
+void Reset(int32_t packetNum) {
+    CurrentTest = GetTestNum(packetNum);
+    Recived = 0;
+    HasFirst = 0;
+    SumLen = 0;
+    SumPayload = 0;
+}
+
+double GetTestTime() {
+    return LastTime - FirstTime;
+}
+
+void PrintStat(int update) {
+    if (update)
+        printf("\r");
+    else
+        printf("\n");
+    printf("%4d %8d %10.2lf ", CurrentTest, Recived, PacketsPerTest*100.0/PacketsPerTest);
+    if (Recived == 0)
+        Recived = 1;
+    printf("%9.2lf %12.2lf ", SumLen/Recived, SumPayload/Recived);
+    double tm = GetTestTime();
+    if (tm < 1e-9)
+        tm = 1e-9;
+    const int MBITDIV = (1<<20)/8;
+    printf("%15.2lf %23.2lf", SumLen/tm/MBITDIV, SumPayload/tm/MBITDIV);
+    if (!update)
+        fflush(stdout);
+}
+
 void ReaderCallback(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
     if (pkthdr->len < 50)
         return;
@@ -108,14 +159,37 @@ void ReaderCallback(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char
     int32_t packetNum = ReadPacketNum(udp->Payload);
     if (packetNum == -1)
         return;
-    fprintf(stdout, "%03d, ", packetNum);
+    if (GetTestNum(packetNum) > CurrentTest) {
+        PrintStat(0);
+        Reset(packetNum);
+    }
+
+    int headerLen = udp->Payload - packet;
+    SumLen += pkthdr->len;
+    SumPayload += pkthdr->len - headerLen;
+    ++Recived;
+    if (!HasFirst) {
+        FirstTime = pkthdr->ts.tv_sec + pkthdr->ts.tv_usec/1e6;
+        HasFirst = 1;
+    }
+    LastTime = pkthdr->ts.tv_sec + pkthdr->ts.tv_usec/1e6;
+
+    if (GetTestNum(packetNum + 1) > CurrentTest) {
+        PrintStat(0);
+        Reset(packetNum + 1);
+    }
     fflush(stdout);
 }
 
 int ReadPackets(const struct TConfig* config) {
+    PacketsPerTest = config->MainConfig.PacketsPerTest;
     if (InitReader(config->MainConfig.Device))
         return 1;
+    printf("%4s %8s %10s ", ColumnTest, ColumnRecived, ColumnRecivedPercent);
+    printf("%9s %12s ", ColumnAvgSize, ColumnAvgPayload);
+    printf("%15s %23s ", ColumnSpeed, ColumnPayloadSpeed);
     pcap_loop(pcap, -1, ReaderCallback, NULL);
+    puts("");
 }
 
 int FinishWriter() {
