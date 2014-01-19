@@ -138,27 +138,27 @@ const char defaultConf[][2][100] = {
         {"main:fake_dest_mac", "5c260a128735"},
         {"main:source_ip", "192.168.0.10"},
         {"main:dest_ip", "192.168.1.11"},
-        {"main:device", "-  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
+        {"main:device", "eth0  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
         {"main:test", "many_networks"},
-        {"main:packets_per_test", "10"},
-        {"many_networks:start", "1"},
-        {"many_networks:step", "3"},
-        {"many_networks:test_count", "10"},
-        {"different_pauload:start", "18"},
-        {"different_pauload:step", "1"},
-        {"different_pauload:test_count", "1470"},
+        {"main:packets_per_test", "100000"},
+        {"many_networks:start", "0"},
+        {"many_networks:step", "5000"},
+        {"many_networks:tests_count", "6"},
+        {"different_payload:start", "18"},
+        {"different_payload:step", "50"},
+        {"different_payload:tests_count", "30"},
         {"low_ttl:start", "0"},
-        {"low_ttl:step", "0.1"},
-        {"low_ttl:test_count", "10"},
+        {"low_ttl:step", "0.05"},
+        {"low_ttl:tests_count", "21"},
         {"bad_mac:start", "0"},
-        {"bad_mac:step", "0.1"},
-        {"bad_mac:test_count", "10"}
+        {"bad_mac:step", "0.05"},
+        {"bad_mac:tests_count", "21"}
 };
 
 const char sections[][20] = {
     "main",
     "many_networks",
-    "different_pauload",
+    "different_payload",
     "low_ttl",
     "bad_mac"
 };
@@ -173,8 +173,8 @@ int WriteDefaultConfig(const char* fileName) {
     for (i = 0; i < ARRAY_SIZE(defaultConf); ++i) {
         iniparser_set(dict, defaultConf[i][0], defaultConf[i][1]);
     }
-//    FILE* f = fopen(fileName, "w");
-    iniparser_dump_ini(dict, stdout);
+    FILE* f = fopen(fileName, "w");
+    iniparser_dump_ini(dict, f);
     iniparser_freedict(dict);
     return 0;
 }
