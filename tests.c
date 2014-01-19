@@ -96,6 +96,9 @@ const char ColumnTime[] = "Time";
 const char ColumnSpeed[] = "Speed Mbit/sec";
 const char ColumnPayloadSpeed[] = "Payload speed Mbit/sec";
 const char ColumnPPS[] = "Packets per sec";
+const char ColumnSended[] = "Sended";
+const char ColumnNetworks[] = "Networks";
+const char ColumnBadPackets[] = "Bad packets %";
 
 int InitReader(const char* name) {
     CurrentTest = 0;
@@ -275,6 +278,7 @@ int ManyNetworksTest(const struct TConfig* config) {
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 0;
+    fprintf(stderr, "Many networks test\n%4s %8s %10s\n", ColumnTest, ColumnSended, ColumnNetworks);
     for (testNum = 0; testNum < tests; ++testNum) {
         networkCount = start + step*testNum;
         if (networkCount == 0)
@@ -289,6 +293,7 @@ int ManyNetworksTest(const struct TConfig* config) {
             SendPacket(&packet, tv);
             ++packetNum;
         }
+        fprintf(stderr, "%4d %8d %10d\n", testNum, packetsPerTest, networkCount);
     }
     FinishWriter();
 }
@@ -309,6 +314,7 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 0;
+    fprintf(stderr, "Different payload test\n%4s %8s %10s %12s\n", ColumnTest, ColumnSended, ColumnAvgSize, ColumnAvgPayload);
     for (testNum = 0; testNum < tests; ++testNum) {
         int size = start + testNum*step;
         if (size < 18)
@@ -322,6 +328,7 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
             SendPacket(&packet, tv);
             ++packetNum;
         }
+        fprintf(stderr, "%4d %8d %10d %12d\n", testNum, packetsPerTest, packet.Size, size);
     }
     FinishWriter();
 }
@@ -341,8 +348,13 @@ int LowTTLTest(const struct TConfig* config) {
     memset(payload, 'x', sizeof(payload));
     struct timeval tv;
     tv.tv_sec = 0;
+    fprintf(stderr, "Low TTL test\n%4s %8s %15s\n", ColumnTest, ColumnSended, ColumnBadPackets);
     for (testNum = 0; testNum < tests; ++testNum) {
         double frenq = start + testNum*step;
+        if (frenq < 0)
+            frenq = 0;
+        if (frenq > 1)
+            frenq = 1;
         int badPackets = 0;
         int i;
         for (i = 0; i < packetsPerTest; ++i) {
@@ -356,6 +368,7 @@ int LowTTLTest(const struct TConfig* config) {
             }
             SendPacket(&packet, tv);
         }
+        fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);
     }
     FinishWriter();
 }
@@ -375,8 +388,13 @@ int BadMacTest(const struct TConfig* config) {
     memset(payload, 'x', sizeof(payload));
     struct timeval tv;
     tv.tv_sec = 0;
+    fprintf(stderr, "Bad MAC test\n%4s %8s %15s\n", ColumnTest, ColumnSended, ColumnBadPackets);
     for (testNum = 0; testNum < tests; ++testNum) {
         double frenq = start + testNum*step;
+        if (frenq < 0)
+            frenq = 0;
+        if (frenq > 1)
+            frenq = 1;
         int badPackets = 0;
         int i;
         for (i = 0; i < packetsPerTest; ++i) {
@@ -390,6 +408,7 @@ int BadMacTest(const struct TConfig* config) {
             }
             SendPacket(&packet, tv);
         }
+        fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);
     }
     FinishWriter();
 }
