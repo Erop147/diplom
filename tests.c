@@ -268,7 +268,7 @@ int ManyNetworksTest(const struct TConfig* config) {
     uint32_t networkCount = start;
     uint32_t packetNum = 0;
     struct TUDPPacket packet;
-    InitUDPPacket(&packet);
+    InitUDPPacket(&packet, &config->MainConfig);
     uint8_t payload[18];
     memset(payload, 'x', sizeof(payload));
     uint8_t sourceIP[4];
@@ -308,7 +308,7 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
     int testNum;
     uint32_t packetNum = 0;
     struct TUDPPacket packet;
-    InitUDPPacket(&packet);
+    InitUDPPacket(&packet, &config->MainConfig);
     uint8_t payload[MXUDP];
     memset(payload, 'x', sizeof(payload));
     struct timeval tv;
@@ -343,7 +343,7 @@ int LowTTLTest(const struct TConfig* config) {
     int testNum;
     uint32_t packetNum = 0;
     struct TUDPPacket packet;
-    InitUDPPacket(&packet);
+    InitUDPPacket(&packet, &config->MainConfig);
     uint8_t payload[18];
     memset(payload, 'x', sizeof(payload));
     struct timeval tv;
@@ -384,7 +384,7 @@ int BadMacTest(const struct TConfig* config) {
     int testNum;
     uint32_t packetNum = 0;
     struct TUDPPacket packet;
-    InitUDPPacket(&packet);
+    InitUDPPacket(&packet, &config->MainConfig);
     uint8_t payload[18];
     memset(payload, 'x', sizeof(payload));
     struct timeval tv;
@@ -402,10 +402,10 @@ int BadMacTest(const struct TConfig* config) {
             WritePacketNum(payload, packetNum);
             SetData(&packet, payload, sizeof(payload));
             if (i != 0 && i != packetsPerTest - 1 && badPackets < i*frenq) {
-                SetMac(&packet, SourceMac, FakeDestMac);
+                SetMac(&packet, config->MainConfig.SourceMac, config->MainConfig.FakeDestMac);
                 ++badPackets;
             } else {
-                SetMac(&packet, SourceMac, DestMac);
+                SetMac(&packet, config->MainConfig.SourceMac, config->MainConfig.DestMac);
             }
             SendPacket(&packet, tv);
             packetNum++;

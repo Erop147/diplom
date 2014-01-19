@@ -3,14 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
-uint8_t SourceMac[6] = {0x00, 0x1d, 0x72, 0xca, 0x0a, 0x49};
-uint8_t DestMac[6] = {0x1c, 0x7e, 0xe5, 0xe0, 0x5e, 0x12};
-uint8_t FakeDestMac[6] = {0x5c, 0x26, 0x0a, 0x12, 0x87, 0x35};
-uint8_t SourceIP[4] = {192, 16, 0, 10};
-uint8_t DestIP[4] = {192, 16, 1, 1};
 const int MXUDP = 1472;
 
-uint16_t CalcCheckSum(uint16_t* data, int len, uint32_t sum) {
+uint16_t CalcCheckSum(const uint16_t* data, int len, uint32_t sum) {
     int i;
     uint32_t msk = (1 << 16) - 1;
     for (i = 0; i < len; ++i) {
@@ -29,7 +24,7 @@ void SetIPCheckSum(struct TIP* ip) {
     ip->CheckSum = htons(checkSum);
 }
 
-uint32_t GetPseudoHeaderSum(struct TIP* ip) {
+uint32_t GetPseudoHeaderSum(const struct TIP* ip) {
     uint32_t sum = 0;
     sum += ip->Protocol;
     sum += ntohs(ip->TotalLength) - 20; // length of payload
@@ -41,7 +36,7 @@ uint32_t GetPseudoHeaderSum(struct TIP* ip) {
     return sum;
 }
 
-void SetUDPCheckSum(struct TIP* ip, struct TUDP* udp) {
+void SetUDPCheckSum(const struct TIP* ip, struct TUDP* udp) {
     udp->CheckSum = 0;
     int len = ntohs(udp->Length);
     if (len&1) {
@@ -55,7 +50,7 @@ void SetUDPCheckSum(struct TIP* ip, struct TUDP* udp) {
     udp->CheckSum = htons(checkSum);
 }
 
-void SetMac(struct TUDPPacket* packet, uint8_t* source, uint8_t* dest) {
+void SetMac(struct TUDPPacket* packet, const uint8_t* source, const uint8_t* dest) {
     int i;
     for (i = 0; i < 6; ++i) {
         packet->Ethernet.Source[i] = source[i];
@@ -63,11 +58,11 @@ void SetMac(struct TUDPPacket* packet, uint8_t* source, uint8_t* dest) {
     }
 }
 
-void InitUDPPacket(struct TUDPPacket* packet) {
+void InitUDPPacket(struct TUDPPacket* packet, const struct TMainConfig* mainConfig) {
     packet->IP = (struct TIP* ) &packet->Ethernet.Payload;
     packet->UDP = (struct TUDP* ) &packet->IP->Payload;
 
-    SetMac(packet, SourceMac, DestMac);
+    SetMac(packet, mainConfig->SourceMac, mainConfig->DestMac);
     packet->Ethernet.Type = htons(0x0800); // IP
 
     struct TIP* ip = packet->IP;
@@ -81,7 +76,7 @@ void InitUDPPacket(struct TUDPPacket* packet) {
     packet->UDP->SourcePort = htons(10000);
     packet->UDP->DestPort = htons(10001);
     packet->UDP->Length = htons(8);   // UDP header length
-    SetIP(packet, SourceIP, DestIP);
+    SetIP(packet, mainConfig->SourceIP, mainConfig->DestIP);
     SetUDPCheckSum(packet->IP, packet->UDP);
     packet->Size = 42;  // All headers, no payload
 }
@@ -103,7 +98,7 @@ void SetTTL(struct TUDPPacket* packet, uint8_t ttl) {
     SetIPCheckSum(packet->IP);
 }
 
-void SetIP(struct TUDPPacket* packet, uint8_t* sourceIP, uint8_t* destIP) {
+void SetIP(struct TUDPPacket* packet, const uint8_t* sourceIP, const uint8_t* destIP) {
     int i;
     for (i = 0; i < 4; ++i) {
         packet->IP->Source[i] = sourceIP[i];
@@ -119,7 +114,7 @@ void SetPort(struct TUDPPacket* packet, uint16_t sourcePort, uint16_t destPort) 
     SetUDPCheckSum(packet->IP, packet->UDP);
 }
 
-void SetData(struct TUDPPacket* packet, uint8_t* data, uint16_t dataLen) {
+void SetData(struct TUDPPacket* packet, const uint8_t* data, uint16_t dataLen) {
     if (dataLen > MXUDP) {
         dataLen = MXUDP;
         fprintf(stderr, "too much data");
