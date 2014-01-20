@@ -3,7 +3,7 @@ CCFLAGS = -Wall
 DFLAGS = -MD -g
 LD = $(CC)
 LDFLAGS =
-OFILES = main.o udp.o ts_util.o tests.o dictionary.o iniparser.o config.o
+OFILES = main.o udp.o ts_util.o tests.o dictionary.o iniparser.o config.o testutils.o
 RM = rm -f
 TARGET = nettest
 
