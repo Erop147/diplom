@@ -1,8 +1,8 @@
-Required packet libpcap-dev
+Required package libpcap-dev
 
 
 For build:
 
-sudo apt-get -i libpcap-dev
+sudo apt-get install libpcap-dev
 
 make
