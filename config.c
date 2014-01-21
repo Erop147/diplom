@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-int ReadMacFromStr(const char* str, uint8_t* mac, const char* errpref) {
+static int ReadMacFromStr(const char* str, uint8_t* mac, const char* errpref) {
     if (str == NULL) {
         fprintf(stderr, "%s no such field\n", errpref);
         return 1;
@@ -20,7 +20,7 @@ int ReadMacFromStr(const char* str, uint8_t* mac, const char* errpref) {
     return 0;
 }
 
-int ReadIPFromStr(const char* str, uint8_t* ip, const char* errpref) {
+static int ReadIPFromStr(const char* str, uint8_t* ip, const char* errpref) {
     if (str == NULL) {
         fprintf(stderr, "%s no such field\n", errpref);
         return 1;
@@ -37,7 +37,7 @@ int ReadIPFromStr(const char* str, uint8_t* ip, const char* errpref) {
     return 0;
 }
 
-int ReadString(const char* source, char* dest, int maxlen, const char* errpref) {
+static int ReadString(const char* source, char* dest, int maxlen, const char* errpref) {
     if (source == NULL) {
         fprintf(stderr, "%s no such field\n", errpref);
         return 1;
@@ -47,7 +47,7 @@ int ReadString(const char* source, char* dest, int maxlen, const char* errpref) 
     return 0;
 }
 
-int ReadInt(const char* source, int* dest, const char* errpref) {
+static int ReadInt(const char* source, int* dest, const char* errpref) {
     if (source == NULL) {
         fprintf(stderr, "%s no such field\n", errpref);
         return 1;
@@ -56,7 +56,7 @@ int ReadInt(const char* source, int* dest, const char* errpref) {
     return 0;
 }
 
-int ReadDouble(const char* source, double* dest, const char* errpref) {
+static int ReadDouble(const char* source, double* dest, const char* errpref) {
     if (source == NULL) {
         fprintf(stderr, "%s no such field\n", errpref);
         return 1;

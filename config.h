@@ -1,5 +1,5 @@
-#ifndef _E146_CONFIG_H_
-#define _E146_CONFIG_H_
+#ifndef _NETTEST_CONFIG_H_
+#define _NETTEST_CONFIG_H_
 
 #include <stdint.h>
 

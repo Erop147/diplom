@@ -1,5 +1,5 @@
-#ifndef _E146_TESTS_H_
-#define _E146_TESTS_H_
+#ifndef _NETTEST_TESTS_H_
+#define _NETTEST_TESTS_H_
 
 #include "config.h"
 
@@ -11,7 +11,7 @@ int LowTTLTest(const struct TConfig* config);
 int BadMacTest(const struct TConfig* config);
 
 extern TTestFuncPointer Tests[];
-extern int TestsCount;
-extern char TestNames[][32];
+extern const int TestsCount;
+extern const char TestNames[][32];
 
 #endif

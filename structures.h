@@ -1,5 +1,5 @@
-#ifndef E146_STRUCTURES_H
-#define E146_STRUCTURES_H
+#ifndef _NETTEST_STRUCTURES_H
+#define _NETTEST_STRUCTURES_H
 #include <stdint.h>
 
 struct TEthernet {

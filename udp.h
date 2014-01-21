@@ -1,5 +1,5 @@
-#ifndef E146_UDP_H
-#define E146_udp_h
+#ifndef _NETTEST_UDP_H
+#define _NETTEST_UDP_H
 
 #include "structures.h"
 #include "config.h"

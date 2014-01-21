@@ -1,12 +1,12 @@
-#ifndef E146_TS_UTIL_H
-#define E146_TS_UTIL_H
+#ifndef _NETTEST_TS_UTIL_H
+#define _NETTEST_TS_UTIL_H
 
 #include <time.h>
 #include <sys/time.h>
 
-int TsCompare (struct timespec time1, struct timespec time2);
-struct timespec TsAdd (struct timespec time1, struct timespec time2);
-struct timespec TsSubtract (struct timespec time1, struct timespec time2);
-void TimevalToTimespec (struct timeval* time1, struct timespec* time2);
+int TsCompare(const struct timespec time1, const struct timespec time2);
+struct timespec TsAdd(const struct timespec time1, const struct timespec time2);
+struct timespec TsSubtract(const struct timespec time1, const struct timespec time2);
+void TimevalToTimespec(const struct timeval* frm, struct timespec* to);
 
 #endif

@@ -177,9 +177,9 @@ TTestFuncPointer Tests[] = {
     &BadMacTest
 };
 
-int TestsCount = ARRAY_SIZE(Tests);
+const int TestsCount = ARRAY_SIZE(Tests);
 
-char TestNames[][32] = {
+const char TestNames[][32] = {
     "many_networks",
     "different_payload",
     "low_ttl",

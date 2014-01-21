@@ -1,5 +1,5 @@
-#ifndef _E146_TESTSUTILS_H_
-#define _E146_TESTSUTILS_H_
+#ifndef _NETTEST_TESTSUTILS_H_
+#define _NETTEST_TESTSUTILS_H_
 
 #include "structures.h"
 #include "config.h"
@@ -19,8 +19,8 @@ extern const char ColumnSended[];
 extern const char ColumnNetworks[];
 extern const char ColumnBadPackets[];
 
-void WaitFor(struct timeval ts);
-int SendPacket(struct TUDPPacket* packet, struct timeval ts);
+void WaitFor(const struct timeval ts);
+int SendPacket(const struct TUDPPacket* packet, const struct timeval ts);
 int InitWriter(const char* name);
 int InitReader(const char* name);
 int32_t GetTestNum(int32_t packetNum);
@@ -36,6 +36,7 @@ void WritePacketNum(char* dest, int32_t packetNum);
 int32_t ReadIntFromBytes(uint8_t* src);
 int32_t ReadPacketNum(char* src);
 void WriteReversed(char* dest, int32_t data, int cnt);
+int GetDefaultDevice(char** res);
 
 #endif
 

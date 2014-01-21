@@ -2,6 +2,7 @@
 #include "udp.h"
 #include "ts_util.h"
 #include "tests.h"
+#include "testutils.h"
 #include "config.h"
 
 #include <stdio.h>
@@ -9,18 +10,7 @@
 #include <pcap.h>
 #include <unistd.h>
 
-int GetDefaultDevice(char** res) {
-    char errbuf[PCAP_ERRBUF_SIZE];
-    char* dev = pcap_lookupdev(errbuf);
-    if (dev == NULL) {
-        fprintf(stderr, "Couldn't find default device: %s\nMay be is it need to be root?\n", errbuf);
-        return 1;
-    }
-    *res = dev;
-    return 0;
-}
-
-int PrintDefaultDevice() {
+static int PrintDefaultDevice() {
     char* dev;
     int res = GetDefaultDevice(&dev);
     if (res)
@@ -29,7 +19,7 @@ int PrintDefaultDevice() {
     return 0;
 }
 
-int PrintAllDevices() {
+static int PrintAllDevices() {
     int err = PrintDefaultDevice();
     if (err)
         return err;
@@ -57,7 +47,7 @@ int PrintAllDevices() {
     return 0;
 }
 
-void PrintHelp(char* progName) {
+static void PrintHelp(const char* progName) {
     fprintf(stderr,
         "USAGE: %s [-lh] [-f config] [-m mode]\n"
         "\n"
@@ -73,7 +63,7 @@ void PrintHelp(char* progName) {
     );
 }
 
-int WriteTest(struct TConfig* config) {
+static int WriteTest(const struct TConfig* config) {
     int i;
     for (i = 0; i < TestsCount; ++i) {
         if (strcmp(config->MainConfig.Test, TestNames[i]) == 0)
@@ -83,18 +73,18 @@ int WriteTest(struct TConfig* config) {
     return 1;
 }
 
-int ReadTest(struct TConfig* config) {
+static int ReadTest(const struct TConfig* config) {
     return ReadPackets(config);
 }
 
-char defaultConfig[] = "config.ini";
-char defaultMode[] = "";
+const char defaultConfig[] = "config.ini";
+const char defaultMode[] = "";
 int main(int argc, char *argv[])
 {
     int c;
     int hasArgs = 0;
-    char* configFile = NULL;
-    char* mode = defaultMode;
+    const char* configFile = NULL;
+    const char* mode = defaultMode;
 
     while((c = getopt(argc, argv, "lhf:m:")) != -1) {
         hasArgs = 1;

@@ -36,7 +36,7 @@ const char ColumnNetworks[] = "Networks";
 const char ColumnBadPackets[] = "Bad packets %";
 const int32_t magic = 0x64ab83cd;
 
-void WaitFor(struct timeval ts) {
+void WaitFor(const struct timeval ts) {
     struct timespec sendtime;
     TimevalToTimespec(&ts, &sendtime);
     sendtime = TsAdd(sendtime, starttime);
@@ -52,7 +52,7 @@ void WaitFor(struct timeval ts) {
     }
 }
 
-int SendPacket(struct TUDPPacket* packet, struct timeval ts) {
+int SendPacket(const struct TUDPPacket* packet, const struct timeval ts) {
     if (offline) {
         struct pcap_pkthdr header;
         header.ts = ts;
@@ -252,5 +252,16 @@ void WriteReversed(char* dest, int32_t data, int cnt) {
         dest[i] = ReverseBits((uint8_t)(data & 255));
         data >>= 8;
     }
+}
+
+int GetDefaultDevice(char** res) {
+    char errbuf[PCAP_ERRBUF_SIZE];
+    char* dev = pcap_lookupdev(errbuf);
+    if (dev == NULL) {
+        fprintf(stderr, "Couldn't find default device: %s\nMay be is it need to be root?\n", errbuf);
+        return 1;
+    }
+    *res = dev;
+    return 0;
 }
 
