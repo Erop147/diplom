@@ -11,7 +11,8 @@ struct TMainConfig {
     uint8_t DestIP[6];
     char Device[64];
     char Test[64];
-    int PacketsPerTest;
+    uint32_t PacketsPerTest;
+    uint32_t FlushEach;
 };
 
 struct TManyNetworkConfig {

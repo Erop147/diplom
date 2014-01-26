@@ -91,6 +91,8 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
         return 1;
     if (ReadInt(iniparser_getstring(dict, "main:packets_per_test", NULL), &config->MainConfig.PacketsPerTest, "main:packets_per_test:"))
         return 1;
+    if (ReadInt(iniparser_getstring(dict, "main:flush_each", NULL), &config->MainConfig.FlushEach, "main:flush_each:"))
+        return 1;
 
 ///// Many Networks Config /////
 
@@ -141,6 +143,7 @@ const char defaultConf[][2][100] = {
         {"main:device", "eth0  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
         {"main:test", "many_networks"},
         {"main:packets_per_test", "100000"},
+        {"main:flush_each", "1000 ; print intermediate stat after reciving each $n packets; 0 - turn off flush"},
         {"many_networks:start", "0"},
         {"many_networks:step", "5000"},
         {"many_networks:tests_count", "6"},

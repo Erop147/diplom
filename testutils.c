@@ -15,6 +15,7 @@ int offline;
 struct timespec starttime;
 struct timespec timenow;
 uint32_t PacketsPerTest;
+uint32_t FlushEach;
 int CurrentTest;
 uint32_t Recived;
 int HasFirst;
@@ -137,10 +138,6 @@ double GetTestTime() {
 }
 
 void PrintStat(int update) {
-    if (update)
-        printf("\r");
-    else
-        printf("\n");
     printf("%4d %8d %10.2lf ", CurrentTest, Recived, Recived*100.0/PacketsPerTest);
     if (Recived == 0)
         Recived = 1;
@@ -150,8 +147,12 @@ void PrintStat(int update) {
         tm = 1e-9;
     const int MBITDIV = (1<<20)/8;
     printf("%15.2lf %23.2lf %16.2lf", SumLen/tm/MBITDIV, SumPayload/tm/MBITDIV, Recived/tm);
-    if (!update)
-        fflush(stdout);
+    if (!update) {
+        printf("\n");
+    } else {
+        printf("\r");
+    }
+    fflush(stdout);
 }
 
 void ReaderCallback(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
@@ -178,23 +179,25 @@ void ReaderCallback(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char
     }
     LastTime = pkthdr->ts.tv_sec + pkthdr->ts.tv_usec/1e6;
 
+    if (FlushEach && Recived % FlushEach == 0)
+        PrintStat(1);
+
     if (GetTestNum(packetNum + 1) > CurrentTest) {
         PrintStat(0);
         Reset(packetNum + 1);
     }
-    fflush(stdout);
 }
 
 int ReadPackets(const struct TConfig* config) {
     PacketsPerTest = config->MainConfig.PacketsPerTest;
+    FlushEach = config->MainConfig.FlushEach;
     if (InitReader(config->MainConfig.Device))
         return 1;
     printf("%4s %8s %10s ", ColumnTest, ColumnRecived, ColumnRecivedPercent);
     printf("%9s %12s %10s ", ColumnAvgSize, ColumnAvgPayload, ColumnTime);
-    printf("%15s %23s %16s", ColumnSpeed, ColumnPayloadSpeed, ColumnPPS);
+    printf("%15s %23s %16s\n", ColumnSpeed, ColumnPayloadSpeed, ColumnPPS);
     fflush(stdout);
     pcap_loop(pcap, -1, ReaderCallback, NULL);
-    puts("");
 }
 
 int FinishWriter() {
