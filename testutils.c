@@ -53,21 +53,22 @@ void WaitFor(const struct timeval ts) {
     }
 }
 
-int SendPacket(const struct TUDPPacket* packet, const struct timeval ts) {
+int SendPacket(const struct TUDPPacket* packet, struct timeval* ts, uint32_t delay) {
     if (offline) {
         struct pcap_pkthdr header;
-        header.ts = ts;
+        header.ts = *ts;
         header.caplen = packet->Size;
         header.len = packet->Size;
         pcap_dump((u_char* ) dumper, &header, (u_char *) &packet->Ethernet);
     } else {
-        WaitFor(ts);
+        WaitFor(*ts);
         if (pcap_inject(pcap, (u_char *) &packet->Ethernet, packet->Size) == -1) {
             pcap_perror(pcap, 0);
             pcap_close(pcap);
             return 1;
         }
     }
+    *ts = TvAdd(*ts, delay);
     return 0;
 }
 

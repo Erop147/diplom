@@ -45,3 +45,14 @@ void TimevalToTimespec(const struct timeval* from, struct timespec* to) {
     to->tv_sec = from->tv_sec;
     to->tv_nsec = from->tv_usec * 1000;
 }
+
+struct timeval TvAdd(const struct timeval time1, uint32_t delta) {
+    struct timeval result = time1;
+    result.tv_sec += delta / 1000000L;
+    result.tv_usec += delta % 1000000L;
+    if (result.tv_usec >= 1000000L) {
+        ++result.tv_sec;
+        result.tv_usec -= 1000000L;
+    }
+    return result;
+}

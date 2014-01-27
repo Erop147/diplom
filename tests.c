@@ -45,7 +45,7 @@ int ManyNetworksTest(const struct TConfig* config) {
             WriteReversed(destIP + 1, i % networkCount, 3);
             SetIP(&packet, sourceIP, destIP);
             SetData(&packet, payload, sizeof(payload));
-            SendPacket(&packet, tv);
+            SendPacket(&packet, &tv, config->MainConfig.Delay);
             ++packetNum;
         }
         fprintf(stderr, "%4d %8d %10d\n", testNum, packetsPerTest, networkCount);
@@ -80,7 +80,7 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
         for (i = 0; i < packetsPerTest; ++i) {
             WritePacketNum(payload, packetNum);
             SetData(&packet, payload, size);
-            SendPacket(&packet, tv);
+            SendPacket(&packet, &tv, config->MainConfig.Delay);
             ++packetNum;
         }
         fprintf(stderr, "%4d %8d %10d %12d\n", testNum, packetsPerTest, packet.Size, size);
@@ -103,6 +103,7 @@ int LowTTLTest(const struct TConfig* config) {
     memset(payload, 'x', sizeof(payload));
     struct timeval tv;
     tv.tv_sec = 0;
+    tv.tv_usec = 0;
     fprintf(stderr, "Low TTL test\n%4s %8s %15s\n", ColumnTest, ColumnSended, ColumnBadPackets);
     for (testNum = 0; testNum < tests; ++testNum) {
         double frenq = start + testNum*step;
@@ -121,7 +122,7 @@ int LowTTLTest(const struct TConfig* config) {
             } else {
                 SetTTL(&packet, 64);
             }
-            SendPacket(&packet, tv);
+            SendPacket(&packet, &tv, config->MainConfig.Delay);
             packetNum++;
         }
         fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);
@@ -144,6 +145,7 @@ int BadMacTest(const struct TConfig* config) {
     memset(payload, 'x', sizeof(payload));
     struct timeval tv;
     tv.tv_sec = 0;
+    tv.tv_usec = 0;
     fprintf(stderr, "Bad MAC test\n%4s %8s %15s\n", ColumnTest, ColumnSended, ColumnBadPackets);
     for (testNum = 0; testNum < tests; ++testNum) {
         double frenq = start + testNum*step;
@@ -162,7 +164,7 @@ int BadMacTest(const struct TConfig* config) {
             } else {
                 SetMac(&packet, config->MainConfig.SourceMac, config->MainConfig.DestMac);
             }
-            SendPacket(&packet, tv);
+            SendPacket(&packet, &tv, config->MainConfig.Delay);
             packetNum++;
         }
         fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);

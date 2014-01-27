@@ -13,6 +13,7 @@ struct TMainConfig {
     char Test[64];
     uint32_t PacketsPerTest;
     uint32_t FlushEach;
+    uint32_t Delay;
 };
 
 struct TManyNetworkConfig {

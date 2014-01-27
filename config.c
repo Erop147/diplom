@@ -93,6 +93,8 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
         return 1;
     if (ReadInt(iniparser_getstring(dict, "main:flush_each", NULL), &config->MainConfig.FlushEach, "main:flush_each:"))
         return 1;
+    if (ReadInt(iniparser_getstring(dict, "main:delay", NULL), &config->MainConfig.Delay, "main:delay:"))
+        return 1;
 
 ///// Many Networks Config /////
 
@@ -144,6 +146,7 @@ const char defaultConf[][2][100] = {
         {"main:test", "many_networks"},
         {"main:packets_per_test", "100000"},
         {"main:flush_each", "1000 ; print intermediate stat after reciving each $n packets; 0 - turn off flush"},
+        {"main:delay", "0 ; send packet not more than once every $n milliseconds"},
         {"many_networks:start", "0"},
         {"many_networks:step", "5000"},
         {"many_networks:tests_count", "6"},

@@ -20,7 +20,7 @@ extern const char ColumnNetworks[];
 extern const char ColumnBadPackets[];
 
 void WaitFor(const struct timeval ts);
-int SendPacket(const struct TUDPPacket* packet, const struct timeval ts);
+int SendPacket(const struct TUDPPacket* packet, struct timeval* ts, uint32_t delay);
 int InitWriter(const char* name);
 int InitReader(const char* name);
 int32_t GetTestNum(int32_t packetNum);
