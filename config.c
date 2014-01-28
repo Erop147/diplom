@@ -136,7 +136,7 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
     return 0;
 }
 
-const char defaultConf[][2][100] = {
+const char defaultConf[][2][200] = {
         {"main:source_mac", "001d72ca0a49"},
         {"main:dest_mac", "1c7ee5e05e12"},
         {"main:fake_dest_mac", "5c260a128735"},
@@ -145,7 +145,7 @@ const char defaultConf[][2][100] = {
         {"main:device", "eth0  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
         {"main:test", "many_networks"},
         {"main:packets_per_test", "100000"},
-        {"main:flush_each", "1000 ; print intermediate stat after reciving each $n packets; 0 - turn off flush"},
+        {"main:flush_each", "0 ; print intermediate stat after reciving each $n packets; 0 - turn off flush; can be reason of skiping packets by reader"},
         {"main:delay", "0 ; send packet not more than once every $n milliseconds"},
         {"many_networks:start", "0"},
         {"many_networks:step", "5000"},
