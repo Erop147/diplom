@@ -79,8 +79,6 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
         return 1;
     if (ReadMacFromStr(iniparser_getstring(dict, "main:dest_mac", NULL), (uint8_t*) &config->MainConfig.DestMac, "main:dest_mac:"))
         return 1;
-    if (ReadMacFromStr(iniparser_getstring(dict, "main:fake_dest_mac", NULL), (uint8_t*) &config->MainConfig.FakeDestMac, "main:fake_dest_mac:"))
-        return 1;
     if (ReadIPFromStr(iniparser_getstring(dict, "main:source_ip", NULL), (uint8_t*) &config->MainConfig.SourceIP, "main:source_ip:"))
         return 1;
     if (ReadIPFromStr(iniparser_getstring(dict, "main:dest_ip", NULL), (uint8_t*) &config->MainConfig.DestIP, "main:dest_ip:"))
@@ -131,6 +129,8 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
         return 1;
     if (ReadInt(iniparser_getstring(dict, "bad_mac:tests_count", NULL), &config->BadMacConfig.TestsCount, "bad_mac:tests_count:"))
         return 1;
+    if (ReadMacFromStr(iniparser_getstring(dict, "bad_mac:fake_dest_mac", NULL), (uint8_t*) &config->BadMacConfig.FakeDestMac, "bad_mac:fake_dest_mac:"))
+        return 1;
 
     iniparser_freedict(dict);
     return 0;
@@ -139,7 +139,6 @@ int LoadConfig(struct TConfig* config, const char* fileName, int writeDefault) {
 const char defaultConf[][2][200] = {
         {"main:source_mac", "001d72ca0a49"},
         {"main:dest_mac", "1c7ee5e05e12"},
-        {"main:fake_dest_mac", "5c260a128735"},
         {"main:source_ip", "192.168.0.10"},
         {"main:dest_ip", "192.168.1.11"},
         {"main:device", "eth0  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
@@ -158,7 +157,8 @@ const char defaultConf[][2][200] = {
         {"low_ttl:tests_count", "21"},
         {"bad_mac:start", "0"},
         {"bad_mac:step", "0.05"},
-        {"bad_mac:tests_count", "21"}
+        {"bad_mac:tests_count", "21"},
+        {"bad_mac:fake_dest_mac", "5c260a128735"}
 };
 
 const char sections[][20] = {

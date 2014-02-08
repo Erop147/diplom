@@ -159,7 +159,7 @@ int BadMacTest(const struct TConfig* config) {
             WritePacketNum(payload, packetNum);
             SetData(&packet, payload, sizeof(payload));
             if (i != 0 && i != packetsPerTest - 1 && badPackets < i*frenq) {
-                SetMac(&packet, config->MainConfig.SourceMac, config->MainConfig.FakeDestMac);
+                SetMac(&packet, config->MainConfig.SourceMac, config->BadMacConfig.FakeDestMac);
                 ++badPackets;
             } else {
                 SetMac(&packet, config->MainConfig.SourceMac, config->MainConfig.DestMac);
