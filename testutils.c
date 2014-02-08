@@ -41,7 +41,7 @@ void WaitFor(const struct timeval ts) {
     struct timespec sendtime;
     TimevalToTimespec(&ts, &sendtime);
     sendtime = TsAdd(sendtime, starttime);
-    if (TsCompare(sendtime,timenow) <= 0)
+    if (TsCompare(sendtime, timenow) <= 0)
         return;
     clock_gettime(CLOCK_REALTIME, &timenow);
     if (TsCompare(sendtime, timenow) <= 0)
@@ -59,10 +59,10 @@ int SendPacket(const struct TUDPPacket* packet, struct timeval* ts, uint32_t del
         header.ts = *ts;
         header.caplen = packet->Size;
         header.len = packet->Size;
-        pcap_dump((u_char* ) dumper, &header, (u_char *) &packet->Ethernet);
+        pcap_dump((u_char* ) dumper, &header, (u_char* ) &packet->Ethernet);
     } else {
         WaitFor(*ts);
-        if (pcap_inject(pcap, (u_char *) &packet->Ethernet, packet->Size) == -1) {
+        if (pcap_inject(pcap, (u_char* ) &packet->Ethernet, packet->Size) == -1) {
             pcap_perror(pcap, 0);
             pcap_close(pcap);
             return 1;
@@ -83,9 +83,8 @@ int InitWriter(const char* name) {
         offline = 0;
         if (strcmp(name, "default") == 0) {
             char* dev;
-            int res = GetDefaultDevice(&dev);
-            if (res)
-                return res;
+            if (GetDefaultDevice(&dev))
+                return 1;
             fprintf(stderr, "Using default device: %s\n", dev);
             name = dev;
         }
@@ -156,7 +155,7 @@ void PrintStat(int update) {
     fflush(stdout);
 }
 
-void ReaderCallback(u_char *args, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
+void ReaderCallback(u_char* args, const struct pcap_pkthdr* pkthdr, const u_char* packet) {
     if (pkthdr->len < 50)
         return;
     struct TEthernet* eth = (struct TEthernet*) packet;
@@ -199,6 +198,8 @@ int ReadPackets(const struct TConfig* config) {
     printf("%15s %23s %16s\n", ColumnSpeed, ColumnPayloadSpeed, ColumnPPS);
     fflush(stdout);
     pcap_loop(pcap, -1, ReaderCallback, NULL);
+    pcap_close(pcap);
+    return 0;
 }
 
 int FinishWriter() {
@@ -208,6 +209,7 @@ int FinishWriter() {
     } else {
         pcap_close(pcap);
     }
+    return 0;
 }
 
 
