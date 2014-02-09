@@ -223,33 +223,17 @@ uint8_t ReverseBits(uint8_t x) {
     return res;
 }
 
-void WriteIntToBytes(char* dest, int32_t val) {
-    int i;
-    for (i = 0; i < 4; ++i) {
-        dest[i] = val & 255;
-        val >>= 8;
-    }
-}
-
 void WritePacketNum(char* dest, int32_t packetNum) {
-    WriteIntToBytes(dest, magic);
-    WriteIntToBytes(dest + 4, packetNum);
-}
-
-int32_t ReadIntFromBytes(uint8_t* src) {
-    int i;
-    uint32_t res = 0;
-    for (i = 3; i >= 0; --i) {
-        res <<= 8;
-        res |= src[i];
-    }
-    return res;
+    int32_t* data = (int32_t* )dest;
+    data[0] = htonl(magic);
+    data[1] = htonl(packetNum);
 }
 
 int32_t ReadPacketNum(char* src) {
-    if (ReadIntFromBytes(src) != magic)
+    int32_t* data = (int32_t* )src;
+    if (ntohl(data[0]) != magic)
         return -1;
-    return ReadIntFromBytes(src + 4);
+    return ntohl(data[1]);
 }
 
 void WriteReversed(char* dest, int32_t data, int cnt) {
