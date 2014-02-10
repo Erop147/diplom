@@ -45,12 +45,14 @@ int ManyNetworksTest(const struct TConfig* config) {
             WriteReversed(destIP + 1, i % networkCount, 3);
             SetIP(&packet, sourceIP, destIP);
             SetData(&packet, payload, sizeof(payload));
-            SendPacket(&packet, &tv, config->MainConfig.Delay);
+            if (SendPacket(&packet, &tv, config->MainConfig.Delay))
+                return 1;
             ++packetNum;
         }
         fprintf(stderr, "%4d %8d %10d\n", testNum, packetsPerTest, networkCount);
     }
     FinishWriter();
+    return 0;
 }
 
 int DifferentPayloadSizeTest(const struct TConfig* config) {
@@ -80,12 +82,14 @@ int DifferentPayloadSizeTest(const struct TConfig* config) {
         for (i = 0; i < packetsPerTest; ++i) {
             WritePacketNum(payload, packetNum);
             SetData(&packet, payload, size);
-            SendPacket(&packet, &tv, config->MainConfig.Delay);
+            if (SendPacket(&packet, &tv, config->MainConfig.Delay))
+                return 1;
             ++packetNum;
         }
         fprintf(stderr, "%4d %8d %10d %12d\n", testNum, packetsPerTest, packet.Size, size);
     }
     FinishWriter();
+    return 0;
 }
 
 int LowTTLTest(const struct TConfig* config) {
@@ -122,12 +126,14 @@ int LowTTLTest(const struct TConfig* config) {
             } else {
                 SetTTL(&packet, 64);
             }
-            SendPacket(&packet, &tv, config->MainConfig.Delay);
+            if (SendPacket(&packet, &tv, config->MainConfig.Delay))
+                return 1;
             packetNum++;
         }
         fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);
     }
     FinishWriter();
+    return 0;
 }
 
 int BadMacTest(const struct TConfig* config) {
@@ -164,12 +170,14 @@ int BadMacTest(const struct TConfig* config) {
             } else {
                 SetMac(&packet, config->MainConfig.SourceMac, config->MainConfig.DestMac);
             }
-            SendPacket(&packet, &tv, config->MainConfig.Delay);
+            if (SendPacket(&packet, &tv, config->MainConfig.Delay))
+                return 1;
             packetNum++;
         }
         fprintf(stderr, "%4d %8d %15.2lf\n", testNum, packetsPerTest, frenq*100);
     }
     FinishWriter();
+    return 0;
 }
 
 TTestFuncPointer Tests[] = {

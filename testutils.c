@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 
 pcap_t* pcap;
 pcap_dumper_t* dumper;
@@ -62,10 +63,16 @@ int SendPacket(const struct TUDPPacket* packet, struct timeval* ts, uint32_t del
         pcap_dump((u_char* ) dumper, &header, (u_char* ) &packet->Ethernet);
     } else {
         WaitFor(*ts);
-        if (pcap_inject(pcap, (u_char* ) &packet->Ethernet, packet->Size) == -1) {
-            pcap_perror(pcap, 0);
-            pcap_close(pcap);
-            return 1;
+        while (1) {
+            if (pcap_inject(pcap, (u_char* ) &packet->Ethernet, packet->Size) == -1) {
+                if (errno == EAGAIN || errno == ENOBUFS)
+                    continue; // silently retry
+                pcap_perror(pcap, 0);
+                pcap_close(pcap);
+                return 1;
+            }
+            else
+                break;
         }
     }
     *ts = TvAdd(*ts, delay);
