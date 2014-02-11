@@ -144,7 +144,7 @@ const char defaultConf[][2][200] = {
         {"main:device", "eth0  ; \"-\" for stdout, \"default\" for default device, \"eth0\" for device eth0"},
         {"main:test", "many_networks"},
         {"main:packets_per_test", "100000"},
-        {"main:flush_each", "0 ; print intermediate stat after reciving each $n packets; 0 - turn off flush; can be reason of skiping packets by reader"},
+        {"main:flush_each", "0 ; print intermediate stat after receiving each $n packets; 0 - turn off flush; can be reason of skiping packets by reader"},
         {"main:delay", "0 ; send packet not more than once every $n milliseconds"},
         {"many_networks:start", "0"},
         {"many_networks:step", "5000"},
